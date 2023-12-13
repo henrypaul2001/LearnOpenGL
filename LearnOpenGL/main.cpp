@@ -88,10 +88,12 @@ int main() {
 	//int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 
 	// Texture loading
-	unsigned int texture;
+
+	// Wooden container
+	unsigned int texture1;
 	glActiveTexture(GL_TEXTURE0);
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glGenTextures(1, &texture1);
+	glBindTexture(GL_TEXTURE_2D, texture1);
 
 	// texture wrapping / filtering options
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -112,6 +114,36 @@ int main() {
 
 	stbi_image_free(data);
 
+	// Face
+	unsigned int texture2;
+	glActiveTexture(GL_TEXTURE1);
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+
+	// texture wrapping / filtering options
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//int width, height, nrChannels;
+	data = stbi_load("Textures/awesomeface.png", &width, &height, &nrChannels, 0);
+
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	stbi_image_free(data);
+
+	defaultShader.use();
+	glUniform1i(glGetUniformLocation(defaultShader.GetID(), "texture1"), 0);
+	defaultShader.setInt("texture2", 1);
+
+
 	while (!glfwWindowShouldClose(window)) {
 		// input
 		processInput(window);
@@ -120,7 +152,10 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
 
 		// shader
 		defaultShader.use();
