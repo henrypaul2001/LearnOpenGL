@@ -82,11 +82,6 @@ int main() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//glBindVertexArray(0);
-
-	//int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-
 	// Texture loading
 
 	// Wooden container
@@ -126,7 +121,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	//int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
 	data = stbi_load("Textures/awesomeface.png", &width, &height, &nrChannels, 0);
 
 	if (data) {
