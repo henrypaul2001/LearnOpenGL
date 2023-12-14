@@ -4,6 +4,11 @@
 #include "Shader.h"
 #include "stb_image.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
@@ -138,6 +143,12 @@ int main() {
 	glUniform1i(glGetUniformLocation(defaultShader.GetID(), "texture1"), 0);
 	defaultShader.setInt("texture2", 1);
 
+	glm::mat4 transform = glm::mat4(1.0f);
+	transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
+
+	unsigned int transformLocation = glGetUniformLocation(defaultShader.GetID(), "transform");
+	glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 
 	while (!glfwWindowShouldClose(window)) {
 		// input
