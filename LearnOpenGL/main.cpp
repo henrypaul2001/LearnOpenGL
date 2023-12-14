@@ -143,13 +143,6 @@ int main() {
 	glUniform1i(glGetUniformLocation(defaultShader.GetID(), "texture1"), 0);
 	defaultShader.setInt("texture2", 1);
 
-	glm::mat4 transform = glm::mat4(1.0f);
-	transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
-
-	unsigned int transformLocation = glGetUniformLocation(defaultShader.GetID(), "transform");
-	glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
-
 	while (!glfwWindowShouldClose(window)) {
 		// input
 		processInput(window);
@@ -166,6 +159,13 @@ int main() {
 		// shader
 		defaultShader.use();
 		//defaultShader.setFloat("someUniformName", 1.0f);
+
+		glm::mat4 transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		unsigned int transformLocation = glGetUniformLocation(defaultShader.GetID(), "transform");
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
