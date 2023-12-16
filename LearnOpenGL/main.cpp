@@ -140,7 +140,7 @@ int main() {
 	stbi_image_free(data);
 
 	defaultShader.use();
-	glUniform1i(glGetUniformLocation(defaultShader.GetID(), "texture1"), 0);
+	defaultShader.setInt("texture1", 0);
 	defaultShader.setInt("texture2", 1);
 
 	while (!glfwWindowShouldClose(window)) {
