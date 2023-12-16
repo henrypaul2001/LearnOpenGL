@@ -143,7 +143,25 @@ int main() {
 	defaultShader.setInt("texture1", 0);
 	defaultShader.setInt("texture2", 1);
 
+	// View
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	// Projection
+	glm::mat4 projection;
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+	// Model
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	double previousTime = glfwGetTime();
+	double currentTime = previousTime;
+	double deltaTime;
 	while (!glfwWindowShouldClose(window)) {
+		previousTime = currentTime;
+		currentTime = glfwGetTime();
+		deltaTime = currentTime - previousTime;
 		// input
 		processInput(window);
 
@@ -160,12 +178,22 @@ int main() {
 		defaultShader.use();
 		//defaultShader.setFloat("someUniformName", 1.0f);
 
-		glm::mat4 transform = glm::mat4(1.0f);
-		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		//glm::mat4 transform = glm::mat4(1.0f);
+		//transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		//transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		unsigned int transformLocation = glGetUniformLocation(defaultShader.GetID(), "transform");
-		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+		model = glm::rotate(model, 0.5f * (float)deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
+
+		unsigned int modelLocation = glGetUniformLocation(defaultShader.GetID(), "model");
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+
+		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.3f * deltaTime));
+
+		unsigned int viewLocation = glGetUniformLocation(defaultShader.GetID(), "view");
+		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+
+		unsigned int projectionLocation = glGetUniformLocation(defaultShader.GetID(), "projection");
+		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
