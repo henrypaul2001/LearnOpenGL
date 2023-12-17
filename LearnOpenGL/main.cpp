@@ -190,9 +190,22 @@ int main() {
 	defaultShader.setInt("texture1", 0);
 	defaultShader.setInt("texture2", 1);
 
+	// Camera
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.3f);
+
+	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+
+	glm::vec3 cameraUp = glm::normalize(glm::cross(cameraDirection, cameraRight));
+
 	// View
 	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	view = glm::lookAt( cameraPos,
+						cameraTarget,
+						cameraUp );
 
 	// Projection
 	glm::mat4 projection;
@@ -213,6 +226,8 @@ int main() {
 		glm::vec3( 1.5f,   0.2f,   -1.5f),
 		glm::vec3(-1.3f,   1.0f,   -1.5f)
 	};
+
+	const float camRadius = 10.0f;
 
 	double previousTime = glfwGetTime();
 	double currentTime = previousTime;
@@ -236,6 +251,11 @@ int main() {
 		// shader
 		defaultShader.use();
 
+		// Update camera
+		float camX = sin(glfwGetTime()) * camRadius;
+		float camZ = cos(glfwGetTime()) * camRadius;
+
+		view = glm::lookAt(glm::vec3(camX, cameraPos.y, camZ), cameraTarget, cameraUp);
 
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", projection);
