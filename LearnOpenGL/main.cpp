@@ -8,13 +8,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+static float deltaTime = 0.0f;
+
 // Camera
-const float cameraSpeed = 0.05f;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.3f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 void processInput(GLFWwindow* window) {
+	float cameraSpeed = 2.5f * deltaTime;
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -234,15 +237,14 @@ int main() {
 		glm::vec3(-1.3f,   1.0f,   -1.5f)
 	};
 
-	const float camRadius = 10.0f;
+	float currentFrame = 0.0f;
+	float lastFrame = 0.0f;
 
-	double previousTime = glfwGetTime();
-	double currentTime = previousTime;
-	double deltaTime;
 	while (!glfwWindowShouldClose(window)) {
-		previousTime = currentTime;
-		currentTime = glfwGetTime();
-		deltaTime = currentTime - previousTime;
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		// input
 		processInput(window);
 
@@ -259,16 +261,13 @@ int main() {
 		defaultShader.use();
 
 		// Update camera
-		//float camX = sin(glfwGetTime()) * camRadius;
-		//float camZ = cos(glfwGetTime()) * camRadius;
-
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", projection);
 
+		// Draw
 		glBindVertexArray(VAO);
-
 		for (unsigned int i = 0; i < 10; i++) {
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
