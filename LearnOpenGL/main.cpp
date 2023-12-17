@@ -21,6 +21,17 @@ float pitch = 0.0f;
 float lastX = 400, lastY = 300;
 const float sensitivity = 0.1f;
 bool firstMouse = true;
+float FOV = 45.0f;
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	FOV -= (float)yoffset;
+	if (FOV < 1.0f) {
+		FOV = 1.0f;
+	}
+	if (FOV > 120.0f) {
+		FOV = 120.0f;
+	}
+}
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 	if (firstMouse) {
@@ -108,7 +119,9 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	void mouse_callback(GLFWwindow * window, double xpos, double ypos);
+	void scroll_callback(GLFWwindow * window, double xoffset, double yoffset);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	Shader defaultShader("default.vert", "default.frag");
 	
@@ -304,6 +317,7 @@ int main() {
 		defaultShader.use();
 
 		// Update camera
+		projection = glm::perspective(glm::radians(FOV), 800.0f / 600.0f, 0.1f, 100.0f);
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		defaultShader.setMat4("view", view);
