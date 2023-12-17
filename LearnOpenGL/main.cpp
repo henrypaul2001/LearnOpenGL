@@ -15,6 +15,9 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.3f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
+float yaw = -90.0f;
+float pitch = 0.0f;
+
 void processInput(GLFWwindow* window) {
 	float cameraSpeed = 2.5f * deltaTime;
 
@@ -261,6 +264,9 @@ int main() {
 		defaultShader.use();
 
 		// Update camera
+		cameraFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront.y = sin(glm::radians(pitch));
+		cameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		defaultShader.setMat4("view", view);
