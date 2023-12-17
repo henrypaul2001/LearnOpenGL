@@ -18,6 +18,43 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float yaw = -90.0f;
 float pitch = 0.0f;
 
+float lastX = 400, lastY = 300;
+const float sensitivity = 0.1f;
+bool firstMouse = true;
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+	if (firstMouse) {
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f) {
+		pitch = 89.0f;
+	}
+	if (pitch < -89.0f) {
+		pitch = -89.0f;
+	}
+
+	// Calculate new direction
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(direction);
+}
+
 void processInput(GLFWwindow* window) {
 	float cameraSpeed = 2.5f * deltaTime;
 
@@ -70,6 +107,8 @@ int main() {
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	void mouse_callback(GLFWwindow * window, double xpos, double ypos);
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 	Shader defaultShader("default.vert", "default.frag");
 	
@@ -265,9 +304,6 @@ int main() {
 		defaultShader.use();
 
 		// Update camera
-		cameraFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		cameraFront.y = sin(glm::radians(pitch));
-		cameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		defaultShader.setMat4("view", view);
