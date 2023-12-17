@@ -8,10 +8,28 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// Camera
+const float cameraSpeed = 0.05f;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.3f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		cameraPos += cameraSpeed * cameraFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		cameraPos -= cameraSpeed * cameraFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
 }
 
@@ -190,21 +208,10 @@ int main() {
 	defaultShader.setInt("texture1", 0);
 	defaultShader.setInt("texture2", 1);
 
-	// Camera
-	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.3f);
-
-	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-
-	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-
-	glm::vec3 cameraUp = glm::normalize(glm::cross(cameraDirection, cameraRight));
-
 	// View
 	glm::mat4 view = glm::mat4(1.0f);
 	view = glm::lookAt( cameraPos,
-						cameraTarget,
+						cameraFront,
 						cameraUp );
 
 	// Projection
@@ -252,10 +259,10 @@ int main() {
 		defaultShader.use();
 
 		// Update camera
-		float camX = sin(glfwGetTime()) * camRadius;
-		float camZ = cos(glfwGetTime()) * camRadius;
+		//float camX = sin(glfwGetTime()) * camRadius;
+		//float camZ = cos(glfwGetTime()) * camRadius;
 
-		view = glm::lookAt(glm::vec3(camX, cameraPos.y, camZ), cameraTarget, cameraUp);
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", projection);
