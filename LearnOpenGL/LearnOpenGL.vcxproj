@@ -146,8 +146,12 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="colours.frag" />
+    <None Include="colours.vert" />
     <None Include="default.frag" />
     <None Include="default.vert" />
+    <None Include="lightCube.frag" />
+    <None Include="lightCube.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

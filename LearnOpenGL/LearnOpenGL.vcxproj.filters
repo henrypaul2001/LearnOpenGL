@@ -58,5 +58,17 @@
     <None Include="default.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="lightCube.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="lightCube.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="colours.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="colours.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>
