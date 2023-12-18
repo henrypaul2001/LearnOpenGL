@@ -92,7 +92,7 @@ int main() {
 	glfwSetScrollCallback(window, scroll_callback);
 
 	Shader defaultShader("default.vert", "default.frag");
-	Shader lightingShader("colours.vert", "colours.frag");
+	Shader lightingShader("lighting.vert", "lighting.frag");
 	Shader lightCubeShader("lightCube.vert", "lightCube.frag");
 	
 	// Cube
