@@ -282,7 +282,8 @@ int main() {
 		glm::vec3 diffuseColour = lightColour * glm::vec3(1.0f);
 		glm::vec3 ambientColour = diffuseColour * glm::vec3(0.2f);
 
-		lightingShader.setVec3("light.position", lightPos);
+		//lightingShader.setVec3("light.position", lightPos);
+		lightingShader.setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 		lightingShader.setVec3("light.ambient", ambientColour);
 		lightingShader.setVec3("light.diffuse", diffuseColour);
 		lightingShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
