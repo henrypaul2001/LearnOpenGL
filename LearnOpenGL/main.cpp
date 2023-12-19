@@ -318,9 +318,10 @@ int main() {
 		glm::vec3(-1.3f,   1.0f,   -1.5f)
 	};
 
+	glm::vec3 lightColour;
+
 	float currentFrame = 0.0f;
 	float lastFrame = 0.0f;
-
 	while (!glfwWindowShouldClose(window)) {
 		currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -350,9 +351,16 @@ int main() {
 		lightingShader.setFloat("material.shininess", 32.0f);
 
 		// Light properties
+		lightColour.x = glm::max((float)sin(glfwGetTime() * 2.0f), 0.2f);
+		lightColour.y = glm::max((float)sin(glfwGetTime() * 2.0f), 0.2f);
+		lightColour.z = glm::max((float)sin(glfwGetTime() * 2.0f), 0.2f);
+
+		glm::vec3 diffuseColour = lightColour * glm::vec3(0.5f);
+		glm::vec3 ambientColour = diffuseColour * glm::vec3(0.2f);
+
 		lightingShader.setVec3("light.position", lightPos);
-		lightingShader.setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-		lightingShader.setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+		lightingShader.setVec3("light.ambient", ambientColour);
+		lightingShader.setVec3("light.diffuse", diffuseColour);
 		lightingShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
 		// Update camera
