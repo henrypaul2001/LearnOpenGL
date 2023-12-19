@@ -282,7 +282,9 @@ int main() {
 		glm::vec3 diffuseColour = lightColour * glm::vec3(1.0f);
 		glm::vec3 ambientColour = diffuseColour * glm::vec3(0.2f);
 
-		lightingShader.setVec3("light.position", lightPos);
+		lightingShader.setVec3("light.position", camera.Position);
+		lightingShader.setVec3("light.direction", camera.Front);
+		lightingShader.setFloat("light.cutoff", glm::cos(glm::radians(12.5f)));
 		lightingShader.setFloat("light.constant", 1.0f);
 		lightingShader.setFloat("light.linear", 0.09f);
 		lightingShader.setFloat("light.quadratic", 0.032f);
