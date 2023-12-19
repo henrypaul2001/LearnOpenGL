@@ -216,15 +216,13 @@ int main() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-#pragma region textures
-
 	// Texture loading
 	unsigned int containerDiffuse = LoadTexture("Textures/container2.png");
+	unsigned int containerSpecular = LoadTexture("Textures/container2_specular.png");
 
 	lightingShader.use();
 	lightingShader.setInt("material.diffuse", 0);
-	//defaultShader.setInt("texture2", 1);
-#pragma endregion
+	lightingShader.setInt("material.specular", 1);
 
 	// View / Projection
 	glm::mat4 projection;
@@ -264,8 +262,8 @@ int main() {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, containerDiffuse);
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, texture2);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, containerSpecular);
 
 		// shader
 		//defaultShader.use();
@@ -281,7 +279,7 @@ int main() {
 		// Light properties
 		lightColour = glm::vec3(1.0f, 1.0f, 1.0f);
 
-		glm::vec3 diffuseColour = lightColour * glm::vec3(0.75f);
+		glm::vec3 diffuseColour = lightColour * glm::vec3(1.0f);
 		glm::vec3 ambientColour = diffuseColour * glm::vec3(0.2f);
 
 		lightingShader.setVec3("light.position", lightPos);
