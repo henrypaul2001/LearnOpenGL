@@ -9,6 +9,16 @@ void Model::Draw(Shader& shader)
 
 void Model::loadModel(std::string filepath)
 {
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		return;
+	}
+	directory = filepath.substr(0, filepath.find_last_of('/'));
+
+	processNode(scene->mRootNode, scene);
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
