@@ -12,7 +12,7 @@
 static float deltaTime = 0.0f;
 
 // Camera
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
 float lastX = 400, lastY = 300;
 bool firstMouse = true;
 
