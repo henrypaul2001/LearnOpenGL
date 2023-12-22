@@ -82,5 +82,11 @@
     <None Include="lighting.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="model_loading.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="model_loading.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>

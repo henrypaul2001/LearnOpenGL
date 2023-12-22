@@ -12,7 +12,7 @@
 class Model
 {
 public:
-	Model(char* filepath) {
+	Model(const char* filepath) {
 		loadModel(filepath);
 	}
 	void Draw(Shader& shader);
