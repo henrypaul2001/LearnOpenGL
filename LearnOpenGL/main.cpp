@@ -47,6 +47,9 @@ glm::vec3 pointLightColours[] = {
 
 glm::vec3 spotLightColour = glm::vec3(1.0f, 1.0f, 1.0f);
 
+bool renderFlashlight = true;
+bool fFlag;
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	camera.ProcessMouseScroll(yoffset);
 }
@@ -83,6 +86,10 @@ void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	}
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+		fFlag = true;
+	}
+
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -163,6 +170,8 @@ void setupLightingShader(Shader* lightingShader) {
 	lightingShader->setFloat("pointLights[3].quadratic", 0.032f);
 
 	// Spotlight
+	lightingShader->setBool("renderFlashlight", renderFlashlight);
+
 	glm::vec3 diffuseColour = spotLightColour * glm::vec3(1.0f);
 	glm::vec3 ambientColour = diffuseColour * glm::vec3(0.2f);
 
@@ -332,6 +341,10 @@ int main() {
 
 		// input
 		processInput(window);
+		if (fFlag) {
+			renderFlashlight = !renderFlashlight;
+			fFlag = false;
+		}
 
 		// rendering
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
@@ -348,11 +361,11 @@ int main() {
 
 		backpackShader.setMat4("projection", projection);
 		backpackShader.setMat4("view", view);
-		backpackShader.setFloat("shininess", 50.0f);
+		backpackShader.setFloat("shininess", 10.0f);
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-2.5f, 0.0f, -0.5f));
-		model = glm::rotate(model, glm::radians(-20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-2.5f, 0.0f, 1.0f));
+		model = glm::rotate(model, glm::radians(15.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.5f));
 		backpackShader.setMat4("model", model);
 		backpack.Draw(backpackShader);
