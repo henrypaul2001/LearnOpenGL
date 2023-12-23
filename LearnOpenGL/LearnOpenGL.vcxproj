@@ -162,6 +162,7 @@
     <None Include="lightCube.vert" />
     <None Include="model_loading.frag" />
     <None Include="model_loading.vert" />
+    <None Include="stencil_border.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
