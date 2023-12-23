@@ -88,5 +88,11 @@
     <None Include="model_loading.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="depth_testing.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="depth_testing.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>
