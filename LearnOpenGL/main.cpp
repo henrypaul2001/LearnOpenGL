@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include "Model.h"
+#include <map>
 
 static float deltaTime = 0.0f;
 
@@ -101,7 +102,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-unsigned int LoadTexture(const char* filepath) {
+unsigned int LoadTexture(const char* filepath, GLenum wrap) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 
@@ -122,7 +123,7 @@ unsigned int LoadTexture(const char* filepath) {
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -319,8 +320,8 @@ int runScene1() {
 	glEnableVertexAttribArray(0);
 
 	// Texture loading
-	unsigned int containerDiffuse = LoadTexture("Textures/container2.png");
-	unsigned int containerSpecular = LoadTexture("Textures/container2_specular.png");
+	unsigned int containerDiffuse = LoadTexture("Textures/container2.png", GL_REPEAT);
+	unsigned int containerSpecular = LoadTexture("Textures/container2_specular.png", GL_REPEAT);
 
 	lightingShader.use();
 	lightingShader.setInt("material.diffuse", 0);
@@ -484,6 +485,9 @@ int runScene2() {
 	
 	glEnable(GL_STENCIL_TEST);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// build and compile shaders
 	// -------------------------
 	Shader shader("depth_testing.vert", "depth_testing.frag");
@@ -545,6 +549,16 @@ int runScene2() {
 		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
 		 5.0f, -0.5f, -5.0f,  2.0f, 2.0f
 	};
+	float transparentVertices[] = {
+		// positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+		0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+		0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+		1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+		0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+		1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+		1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+	};
 	// cube VAO
 	unsigned int cubeVAO, cubeVBO;
 	glGenVertexArrays(1, &cubeVAO);
@@ -569,16 +583,37 @@ int runScene2() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glBindVertexArray(0);
+	// transparent VAO
+	unsigned int windowsVAO, windowsVBO;
+	glGenVertexArrays(1, &windowsVAO);
+	glGenBuffers(1, &windowsVBO);
+	glBindVertexArray(windowsVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, windowsVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), transparentVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glBindVertexArray(0);
+
 
 	// load textures
 	// -------------
-	unsigned int cubeTexture = LoadTexture("Textures/marble.jpg");
-	unsigned int floorTexture = LoadTexture("Textures/metal.png");
+	unsigned int cubeTexture = LoadTexture("Textures/marble.jpg", GL_REPEAT);
+	unsigned int floorTexture = LoadTexture("Textures/metal.png", GL_REPEAT);
+	unsigned int transparentTexture = LoadTexture("Textures/window.png", GL_CLAMP_TO_EDGE);
 
 	// shader configuration
 	// --------------------
 	shader.use();
 	shader.setInt("texture1", 0);
+
+	std::vector<glm::vec3> windows;
+	windows.push_back(glm::vec3(-1.5f, 0.0f, -0.84f));
+	windows.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
+	windows.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
+	windows.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
+	windows.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
 
 	// render loop
 	// -----------
@@ -658,6 +693,26 @@ int runScene2() {
 		glStencilMask(0xFF);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glEnable(GL_DEPTH_TEST);
+
+		// render windows
+		std::map<float, glm::vec3> sortedTransparents;
+		for (unsigned int i = 0; i < windows.size(); i++) {
+			float distance = glm::length(camera.Position - windows[i]);
+			sortedTransparents[distance] = windows[i];
+		}
+
+		shader.use();
+		shader.setMat4("view", view);
+		shader.setMat4("projection", projection);
+		glBindVertexArray(windowsVAO);
+		glBindTexture(GL_TEXTURE_2D, transparentTexture);
+
+		for (std::map<float, glm::vec3>::reverse_iterator it = sortedTransparents.rbegin(); it != sortedTransparents.rend(); ++it) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, it->second);
+			shader.setMat4("model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
