@@ -528,6 +528,7 @@ int runScene2() {
 	// -------------------------
 	Shader shader("depth_testing.vert", "depth_testing.frag");
 	Shader borderShader("depth_testing.vert", "stencil_border.frag");
+	Shader framebufferShader("framebuffer.vert", "framebuffer.frag");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -642,7 +643,18 @@ int runScene2() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glBindVertexArray(0);
-
+	// framebuffer quad vao
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glBindVertexArray(0);
 
 	// load textures
 	// -------------
@@ -678,11 +690,16 @@ int runScene2() {
 
 		// render
 		// ------
+
+		// FIRST PASS
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
+		// draw scene to custom framebuffer
 		shader.use();
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -690,7 +707,7 @@ int runScene2() {
 		shader.setMat4("view", view);
 		shader.setMat4("projection", projection);
 
-		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilMask(0x00);
 
@@ -764,6 +781,18 @@ int runScene2() {
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
 
+		// SECOND PASS
+		glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		framebufferShader.use();
+		glBindVertexArray(quadVAO);
+		glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_STENCIL_TEST);
+		glBindTexture(GL_TEXTURE_2D, texColourBuffer);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
@@ -774,8 +803,12 @@ int runScene2() {
 	// ------------------------------------------------------------------------
 	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteVertexArrays(1, &planeVAO);
+	glDeleteVertexArrays(1, &quadVAO);
 	glDeleteBuffers(1, &cubeVBO);
 	glDeleteBuffers(1, &planeVBO);
+	glDeleteBuffers(1, &quadVBO);
+	glDeleteRenderbuffers(1, &rbo);
+	glDeleteFramebuffers(1, &framebuffer);
 
 	glfwTerminate();
 	return 0;
