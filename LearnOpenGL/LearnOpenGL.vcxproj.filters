@@ -97,5 +97,11 @@
     <None Include="stencil_border.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="framebuffer.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="framebuffer.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>
