@@ -26,10 +26,16 @@ vec4 Grayscale() {
 
 const float offset = 1.0 / 300.0;
 
-float[9] Sharpen = float[](
+float[9] HardSharpen = float[](
 	-1, -1, -1,
 	-1,  9, -1,
 	-1, -1, -1
+);
+
+float[9] SubtleSharpen = float[](
+	 0, -1,  0,
+	-1,  5, -1,
+	 0, -1,  0
 );
 
 float[9] Blur = float[](
@@ -42,6 +48,18 @@ float[9] EdgeDetect = float[](
 	1,  1,  1,
 	1, -8,  1,
 	1,  1,  1
+);
+
+float[9] Emboss = float[](
+	-2, -1,  0,
+	-1,  1,  1,
+	 0,  1,  2
+);
+
+float[9] Sobel = float[](
+	 1,  2,  1,
+	 0,  0,  0,
+	-1, -2, -1
 );
 
 vec4 Kernel(float[9] kernel) {
@@ -70,5 +88,5 @@ vec4 Kernel(float[9] kernel) {
 }
 
 void main() {
-	FragColor = Kernel(EdgeDetect);
+	FragColor = NoEffect();
 }
