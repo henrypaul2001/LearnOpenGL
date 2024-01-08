@@ -797,21 +797,6 @@ int runScene2() {
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-		// first render skybox without depth writing
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_STENCIL_TEST);
-		glCullFace(GL_FRONT);
-		cubemapShader.use();
-		cubemapShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix()))); // remove translation from view matrix but keep rotation
-		cubemapShader.setMat4("projection", projection);
-		glBindVertexArray(cubeVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_STENCIL_TEST);
-		glCullFace(GL_BACK);
-
 		shader.use();
 		shader.setMat4("view", view);
 		shader.setMat4("projection", projection);
@@ -869,7 +854,20 @@ int runScene2() {
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glEnable(GL_DEPTH_TEST);
 
-		// render windows
+		// render skybox
+		glDepthFunc(GL_LEQUAL);
+		glCullFace(GL_FRONT);
+		cubemapShader.use();
+		cubemapShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix()))); // remove translation from view matrix but keep rotation
+		cubemapShader.setMat4("projection", projection);
+		glBindVertexArray(cubeVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glCullFace(GL_BACK);
+		glDepthFunc(GL_LESS);
+
+		// render transparent objects last
 		glDisable(GL_CULL_FACE);
 		std::map<float, glm::vec3> sortedTransparents;
 		for (unsigned int i = 0; i < windows.size(); i++) {
