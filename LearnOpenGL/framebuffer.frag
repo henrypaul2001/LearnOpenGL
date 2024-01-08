@@ -38,6 +38,12 @@ float[9] Blur = float[](
 	1.0 / 16, 2.0 / 16, 1.0 / 16
 );
 
+float[9] EdgeDetect = float[](
+	1,  1,  1,
+	1, -8,  1,
+	1,  1,  1
+);
+
 vec4 Kernel(float[9] kernel) {
 	vec2 offsets[9] = vec2[](
 		vec2(-offset, offset),  // top-left
@@ -64,5 +70,5 @@ vec4 Kernel(float[9] kernel) {
 }
 
 void main() {
-	FragColor = Kernel(Blur);
+	FragColor = Kernel(EdgeDetect);
 }
