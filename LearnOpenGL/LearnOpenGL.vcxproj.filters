@@ -103,5 +103,11 @@
     <None Include="framebuffer.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="cubemap.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="cubemap.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>
