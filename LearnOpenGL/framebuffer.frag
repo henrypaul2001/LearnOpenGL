@@ -25,7 +25,20 @@ vec4 Grayscale() {
 }
 
 const float offset = 1.0 / 300.0;
-vec4 Sharpen() {
+
+float[9] Sharpen = float[](
+	-1, -1, -1,
+	-1,  9, -1,
+	-1, -1, -1
+);
+
+float[9] Blur = float[](
+	1.0 / 16, 2.0 / 16, 1.0 / 16,
+	2.0 / 16, 4.0 / 16, 2.0 / 16,
+	1.0 / 16, 2.0 / 16, 1.0 / 16
+);
+
+vec4 Kernel(float[9] kernel) {
 	vec2 offsets[9] = vec2[](
 		vec2(-offset, offset),  // top-left
 		vec2( 0.0f, offset),	// top-center
@@ -36,12 +49,6 @@ vec4 Sharpen() {
 		vec2(-offset, -offset), // bottom-left
 		vec2( 0.0f, -offset),   // bottom-center
 		vec2( offset, -offset)  // bottom-right
-	);
-
-	float kernel[9] = float[](
-		-1, -1, -1,
-		-1,  9, -1,
-		-1, -1, -1
 	);
 
 	vec3 sampleTex[9];
@@ -57,5 +64,5 @@ vec4 Sharpen() {
 }
 
 void main() {
-	FragColor = Sharpen();
+	FragColor = Kernel(Blur);
 }
