@@ -555,7 +555,7 @@ int runScene2() {
 	Shader shader("depth_testing.vert", "depth_testing.frag");
 	Shader borderShader("depth_testing.vert", "stencil_border.frag");
 	Shader framebufferShader("framebuffer.vert", "framebuffer.frag");
-	Shader cubemapShader("cubemap.vert", "cubemap.frag");
+	Shader cubemapShader("skybox.vert", "skybox.frag");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
