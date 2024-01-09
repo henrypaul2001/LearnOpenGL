@@ -809,6 +809,7 @@ int runScene2() {
 		glStencilMask(0x00);
 
 		// floor
+		/*
 		glBindVertexArray(planeVAO);
 		glBindTexture(GL_TEXTURE_2D, floorTexture);
 		shader.setMat4("model", glm::mat4(1.0f));
@@ -817,6 +818,7 @@ int runScene2() {
 
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
+		*/
 
 		// cube
 		glBindVertexArray(cubeVAO);
@@ -875,6 +877,7 @@ int runScene2() {
 		glDepthFunc(GL_LESS);
 
 		// render transparent objects last
+		/*
 		glDisable(GL_CULL_FACE);
 		std::map<float, glm::vec3> sortedTransparents;
 		for (unsigned int i = 0; i < windows.size(); i++) {
@@ -894,7 +897,7 @@ int runScene2() {
 			shader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
-
+		*/
 		// SECOND PASS
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -902,6 +905,7 @@ int runScene2() {
 
 		framebufferShader.use();
 		glBindVertexArray(quadVAO);
+		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		//glDisable(GL_STENCIL_TEST);
 		glBindTexture(GL_TEXTURE_2D, texColourBuffer);
