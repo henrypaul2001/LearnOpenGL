@@ -152,7 +152,7 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cubemap_reflection.frag" />
+    <None Include="reflection_cubemap.frag" />
     <None Include="reflection_cubemap.vert" />
     <None Include="skybox.frag" />
     <None Include="skybox.vert" />

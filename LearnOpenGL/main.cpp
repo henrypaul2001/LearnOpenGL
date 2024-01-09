@@ -555,7 +555,8 @@ int runScene2() {
 	Shader shader("depth_testing.vert", "depth_testing.frag");
 	Shader borderShader("depth_testing.vert", "stencil_border.frag");
 	Shader framebufferShader("framebuffer.vert", "framebuffer.frag");
-	Shader cubemapShader("skybox.vert", "skybox.frag");
+	Shader skyboxShader("skybox.vert", "skybox.frag");
+	Shader cubemapReflectionShader("reflection_cubemap.vert", "reflection_cubemap.frag");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -759,8 +760,8 @@ int runScene2() {
 	shader.use();
 	shader.setInt("texture1", 0);
 
-	cubemapShader.use();
-	cubemapShader.setInt("cubemap", 0);
+	skyboxShader.use();
+	skyboxShader.setInt("cubemap", 0);
 
 	std::vector<glm::vec3> windows;
 	windows.push_back(glm::vec3(-1.5f, 0.0f, -0.84f));
@@ -817,16 +818,25 @@ int runScene2() {
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
 
-		// cubes
+		// cube
 		glBindVertexArray(cubeVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, cubeTexture);
 		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
 		shader.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// reflective cube
+		cubemapReflectionShader.use();
+		cubemapReflectionShader.setMat4("view", view);
+		cubemapReflectionShader.setMat4("projection", projection);
+		cubemapReflectionShader.setVec3("cameraPos", camera.Position);
+
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-		shader.setMat4("model", model);
+		cubemapReflectionShader.setMat4("model", model);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// cube outlines
@@ -846,11 +856,6 @@ int runScene2() {
 		model = glm::scale(model, glm::vec3(1.02f, 1.02f, 1.02f));
 		borderShader.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.02f, 1.02f, 1.02f));
-		borderShader.setMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glStencilMask(0xFF);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -859,9 +864,9 @@ int runScene2() {
 		// render skybox
 		glDepthFunc(GL_LEQUAL);
 		glCullFace(GL_FRONT);
-		cubemapShader.use();
-		cubemapShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix()))); // remove translation from view matrix but keep rotation
-		cubemapShader.setMat4("projection", projection);
+		skyboxShader.use();
+		skyboxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix()))); // remove translation from view matrix but keep rotation
+		skyboxShader.setMat4("projection", projection);
 		glBindVertexArray(cubeVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
