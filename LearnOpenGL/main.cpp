@@ -770,6 +770,23 @@ int runScene2() {
 	windows.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
 	windows.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
 
+	// uniform blocks
+	unsigned int skyboxBlockLocation = glGetUniformBlockIndex(skyboxShader.GetID(), "Matrices");
+	unsigned int reflection_cubemapBlockLocation = glGetUniformBlockIndex(cubemapReflectionShader.GetID(), "Matrices");
+	unsigned int depth_testingBlockLocation = glGetUniformBlockIndex(shader.GetID(), "Matrices");
+
+	glUniformBlockBinding(skyboxShader.GetID(), skyboxBlockLocation, 0);
+	glUniformBlockBinding(cubemapReflectionShader.GetID(), reflection_cubemapBlockLocation, 0);
+	glUniformBlockBinding(shader.GetID(), depth_testingBlockLocation, 0);
+
+	unsigned int uboMatrices;
+	glGenBuffers(1, &uboMatrices);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+	glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -790,7 +807,7 @@ int runScene2() {
 		// FIRST PASS
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -800,16 +817,22 @@ int runScene2() {
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+		// Update uniform blocks
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 		shader.use();
-		shader.setMat4("view", view);
-		shader.setMat4("projection", projection);
+		//shader.setMat4("view", view);
+		//shader.setMat4("projection", projection);
 
 		glEnable(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilMask(0x00);
 
 		// floor
-		/*
+		
 		glBindVertexArray(planeVAO);
 		glBindTexture(GL_TEXTURE_2D, floorTexture);
 		shader.setMat4("model", glm::mat4(1.0f));
@@ -818,7 +841,7 @@ int runScene2() {
 
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
-		*/
+		
 
 		// cube
 		glBindVertexArray(cubeVAO);
@@ -830,8 +853,8 @@ int runScene2() {
 
 		// reflective cube
 		cubemapReflectionShader.use();
-		cubemapReflectionShader.setMat4("view", view);
-		cubemapReflectionShader.setMat4("projection", projection);
+		//cubemapReflectionShader.setMat4("view", view);
+		//cubemapReflectionShader.setMat4("projection", projection);
 		cubemapReflectionShader.setVec3("cameraPos", camera.Position);
 
 		model = glm::mat4(1.0f);
@@ -841,6 +864,30 @@ int runScene2() {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		// render skybox
+		glDepthFunc(GL_LEQUAL);
+		glCullFace(GL_FRONT);
+		glStencilMask(0x00);
+
+		skyboxShader.use();
+
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(glm::mat4(glm::mat3(camera.GetViewMatrix())))); // remove translation from view matrix but keep rotation
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		//skyboxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix()))); // remove translation from view matrix but keep rotation
+		//skyboxShader.setMat4("projection", projection);
+		glBindVertexArray(cubeVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glCullFace(GL_BACK);
+		glDepthFunc(GL_LESS);
+
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 		// cube outlines
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilMask(0x00);
@@ -848,9 +895,9 @@ int runScene2() {
 
 		borderShader.use();
 		model = glm::mat4(1.0f);
-		borderShader.setMat4("view", view);
-		borderShader.setMat4("projection", projection);
-		
+		//borderShader.setMat4("view", view);
+		//borderShader.setMat4("projection", projection);
+
 		glBindVertexArray(cubeVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, cubeTexture);
@@ -863,21 +910,8 @@ int runScene2() {
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glEnable(GL_DEPTH_TEST);
 
-		// render skybox
-		glDepthFunc(GL_LEQUAL);
-		glCullFace(GL_FRONT);
-		skyboxShader.use();
-		skyboxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix()))); // remove translation from view matrix but keep rotation
-		skyboxShader.setMat4("projection", projection);
-		glBindVertexArray(cubeVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glCullFace(GL_BACK);
-		glDepthFunc(GL_LESS);
-
 		// render transparent objects last
-		/*
+		
 		glDisable(GL_CULL_FACE);
 		std::map<float, glm::vec3> sortedTransparents;
 		for (unsigned int i = 0; i < windows.size(); i++) {
@@ -886,8 +920,9 @@ int runScene2() {
 		}
 
 		shader.use();
-		shader.setMat4("view", view);
-		shader.setMat4("projection", projection);
+
+		//shader.setMat4("view", view);
+		//shader.setMat4("projection", projection);
 		glBindVertexArray(windowsVAO);
 		glBindTexture(GL_TEXTURE_2D, transparentTexture);
 
@@ -897,7 +932,7 @@ int runScene2() {
 			shader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
-		*/
+		
 		// SECOND PASS
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
