@@ -24,6 +24,7 @@ void BuildHouse(vec4 position)
 	EmitVertex();
 
 	gl_Position = position + vec4( 0.0, 0.4, 0.0, 0.0); // top
+	fColor = vec3(1.0, 1.0, 1.0);
 	EmitVertex();
 
 	EndPrimitive();

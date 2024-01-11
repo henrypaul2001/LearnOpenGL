@@ -145,6 +145,17 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
+	// geometry
+	geometry = glCreateShader(GL_GEOMETRY_SHADER);
+	glShaderSource(geometry, 1, &gShaderCode, NULL);
+	glCompileShader(geometry);
+
+	glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		glGetShaderInfoLog(geometry, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
 	// fragment
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment, 1, &fShaderCode, NULL);
@@ -155,17 +166,6 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 	if (!success) {
 		glGetShaderInfoLog(fragment, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-	// geometry
-	geometry = glCreateShader(GL_GEOMETRY_SHADER);
-	glShaderSource(geometry, 1, &gShaderCode, NULL);
-	glCompileShader(geometry);
-
-	glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
 	// shader program

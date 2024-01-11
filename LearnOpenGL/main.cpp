@@ -558,6 +558,7 @@ int runScene2() {
 	Shader skyboxShader("skybox.vert", "skybox.frag");
 	Shader cubemapReflectionShader("reflection_cubemap.vert", "reflection_cubemap.frag");
 	Shader geometryShader("geometry_shaders.vert", "geometry_shaders.frag", "geometry_shaders.geom");
+	Shader explodeShader("explode.vert", "explode.frag", "explode.geom");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -792,10 +793,12 @@ int runScene2() {
 	unsigned int skyboxBlockLocation = glGetUniformBlockIndex(skyboxShader.GetID(), "Matrices");
 	unsigned int reflection_cubemapBlockLocation = glGetUniformBlockIndex(cubemapReflectionShader.GetID(), "Matrices");
 	unsigned int depth_testingBlockLocation = glGetUniformBlockIndex(shader.GetID(), "Matrices");
+	unsigned int explodeBlockLocation = glGetUniformBlockIndex(shader.GetID(), "Matrices");
 
 	glUniformBlockBinding(skyboxShader.GetID(), skyboxBlockLocation, 0);
 	glUniformBlockBinding(cubemapReflectionShader.GetID(), reflection_cubemapBlockLocation, 0);
 	glUniformBlockBinding(shader.GetID(), depth_testingBlockLocation, 0);
+	glUniformBlockBinding(explodeShader.GetID(), explodeBlockLocation, 0);
 
 	unsigned int uboMatrices;
 	glGenBuffers(1, &uboMatrices);
@@ -804,6 +807,10 @@ int runScene2() {
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+
+	// Model loading
+	stbi_set_flip_vertically_on_load(true);
+	Model backpack = Model("Models/backpack/backpack.obj");
 
 	// render loop
 	// -----------
@@ -840,11 +847,19 @@ int runScene2() {
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+		/*
 		glCullFace(GL_FRONT);
 		geometryShader.use();
 		glBindVertexArray(pointsVAO);
 		glDrawArrays(GL_POINTS, 0, 4);
 		glCullFace(GL_BACK);
+		*/
+
+		explodeShader.use();
+		explodeShader.setFloat("time", glfwGetTime());
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		explodeShader.setMat4("model", model);
+		backpack.Draw(explodeShader);
 
 		/*
 		shader.use();

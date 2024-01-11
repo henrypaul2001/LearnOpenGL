@@ -127,5 +127,14 @@
     <None Include="geometry_shaders.geom">
       <Filter>Source Files\Shaders\Geometry</Filter>
     </None>
+    <None Include="explode.geom">
+      <Filter>Source Files\Shaders\Geometry</Filter>
+    </None>
+    <None Include="explode.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="explode.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>
