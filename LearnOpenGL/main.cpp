@@ -826,7 +826,6 @@ int runScene2() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
 
 		// draw scene to custom framebuffer
 		glm::mat4 model = glm::mat4(1.0f);
@@ -839,9 +838,11 @@ int runScene2() {
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+		glCullFace(GL_FRONT);
 		geometryShader.use();
 		glBindVertexArray(pointsVAO);
 		glDrawArrays(GL_POINTS, 0, 4);
+		glCullFace(GL_BACK);
 
 		/*
 		shader.use();
