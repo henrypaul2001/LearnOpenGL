@@ -824,15 +824,12 @@ int runScene2() {
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		shader.use();
-		//shader.setMat4("view", view);
-		//shader.setMat4("projection", projection);
 
 		glEnable(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilMask(0x00);
 
 		// floor
-		
 		glBindVertexArray(planeVAO);
 		glBindTexture(GL_TEXTURE_2D, floorTexture);
 		shader.setMat4("model", glm::mat4(1.0f));
@@ -853,8 +850,6 @@ int runScene2() {
 
 		// reflective cube
 		cubemapReflectionShader.use();
-		//cubemapReflectionShader.setMat4("view", view);
-		//cubemapReflectionShader.setMat4("projection", projection);
 		cubemapReflectionShader.setVec3("cameraPos", camera.Position);
 
 		model = glm::mat4(1.0f);
@@ -875,8 +870,6 @@ int runScene2() {
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(glm::mat4(glm::mat3(camera.GetViewMatrix())))); // remove translation from view matrix but keep rotation
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-		//skyboxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix()))); // remove translation from view matrix but keep rotation
-		//skyboxShader.setMat4("projection", projection);
 		glBindVertexArray(cubeVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
@@ -895,8 +888,6 @@ int runScene2() {
 
 		borderShader.use();
 		model = glm::mat4(1.0f);
-		//borderShader.setMat4("view", view);
-		//borderShader.setMat4("projection", projection);
 
 		glBindVertexArray(cubeVAO);
 		glActiveTexture(GL_TEXTURE0);
@@ -911,7 +902,6 @@ int runScene2() {
 		glEnable(GL_DEPTH_TEST);
 
 		// render transparent objects last
-		
 		glDisable(GL_CULL_FACE);
 		std::map<float, glm::vec3> sortedTransparents;
 		for (unsigned int i = 0; i < windows.size(); i++) {
@@ -920,9 +910,6 @@ int runScene2() {
 		}
 
 		shader.use();
-
-		//shader.setMat4("view", view);
-		//shader.setMat4("projection", projection);
 		glBindVertexArray(windowsVAO);
 		glBindTexture(GL_TEXTURE_2D, transparentTexture);
 
@@ -942,7 +929,6 @@ int runScene2() {
 		glBindVertexArray(quadVAO);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-		//glDisable(GL_STENCIL_TEST);
 		glBindTexture(GL_TEXTURE_2D, texColourBuffer);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
