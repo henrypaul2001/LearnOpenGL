@@ -21,5 +21,5 @@ vec4 Refract() {
 }
 
 void main() {
-	FragColor = Refract();
+	FragColor = Reflect();
 }

@@ -115,5 +115,11 @@
     <None Include="reflection_cubemap.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="geometry_shaders.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="geometry_shaders.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>

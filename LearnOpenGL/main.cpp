@@ -469,7 +469,7 @@ int runScene1() {
 
 int runScene2() {
 	// glfw: initialize and configure
-// ------------------------------
+	// ------------------------------
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -557,6 +557,7 @@ int runScene2() {
 	Shader framebufferShader("framebuffer.vert", "framebuffer.frag");
 	Shader skyboxShader("skybox.vert", "skybox.frag");
 	Shader cubemapReflectionShader("reflection_cubemap.vert", "reflection_cubemap.frag");
+	Shader geometryShader("geometry_shaders.vert", "geometry_shaders.frag");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -679,6 +680,12 @@ int runScene2() {
 		-1.0f, -1.0f,  1.0f,
 		 1.0f, -1.0f,  1.0f
 	};
+	float points[] = {
+		-0.5f,  0.5f, // top left
+		 0.5f,  0.5f, // top right
+		 0.5f, -0.5f, // bottom right
+		-0.5f, -0.5f  // bottom left
+	};
 	// cube VAO
 	unsigned int cubeVAO, cubeVBO;
 	glGenVertexArrays(1, &cubeVAO);
@@ -717,7 +724,7 @@ int runScene2() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glBindVertexArray(0);
-	// framebuffer quad vao
+	// framebuffer quad VAO
 	unsigned int quadVAO, quadVBO;
 	glGenVertexArrays(1, &quadVAO);
 	glGenBuffers(1, &quadVBO);
@@ -729,7 +736,7 @@ int runScene2() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	glBindVertexArray(0);
-	// skybox vao
+	// skybox VAO
 	unsigned int skyboxVAO, skyboxVBO;
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
@@ -738,6 +745,15 @@ int runScene2() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	// points VAO
+	unsigned int pointsVAO, pointsVBO;
+	glGenVertexArrays(1, &pointsVAO);
+	glGenBuffers(1, &pointsVBO);
+	glBindVertexArray(pointsVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
 	// load textures
 	// -------------
@@ -803,7 +819,7 @@ int runScene2() {
 
 		// render
 		// ------
-
+		
 		// FIRST PASS
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -823,6 +839,11 @@ int runScene2() {
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+		geometryShader.use();
+		glBindVertexArray(pointsVAO);
+		glDrawArrays(GL_POINTS, 0, 4);
+
+		/*
 		shader.use();
 
 		glEnable(GL_STENCIL_TEST);
@@ -919,7 +940,7 @@ int runScene2() {
 			shader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
-		
+		*/
 		// SECOND PASS
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // default framebuffer
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -931,6 +952,7 @@ int runScene2() {
 		glDisable(GL_DEPTH_TEST);
 		glBindTexture(GL_TEXTURE_2D, texColourBuffer);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
