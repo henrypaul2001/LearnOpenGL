@@ -557,7 +557,7 @@ int runScene2() {
 	Shader framebufferShader("framebuffer.vert", "framebuffer.frag");
 	Shader skyboxShader("skybox.vert", "skybox.frag");
 	Shader cubemapReflectionShader("reflection_cubemap.vert", "reflection_cubemap.frag");
-	Shader geometryShader("geometry_shaders.vert", "geometry_shaders.frag");
+	Shader geometryShader("geometry_shaders.vert", "geometry_shaders.frag", "geometry_shaders.geom");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
