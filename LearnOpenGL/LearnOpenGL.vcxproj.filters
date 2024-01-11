@@ -22,6 +22,9 @@
     <Filter Include="Source Files\Shaders\Vertex">
       <UniqueIdentifier>{e7bf02c6-b710-42a3-ba93-03a82ed836b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shaders\Geometry">
+      <UniqueIdentifier>{365fa91e-c093-40b2-9115-506737b98255}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Libraries\C++\glad\src\glad.c">
@@ -120,6 +123,9 @@
     </None>
     <None Include="geometry_shaders.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="geometry_shaders.geom">
+      <Filter>Source Files\Shaders\Geometry</Filter>
     </None>
   </ItemGroup>
 </Project>

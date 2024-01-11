@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="geometry_shaders.frag" />
+    <None Include="geometry_shaders.geom" />
     <None Include="geometry_shaders.vert" />
     <None Include="reflection_cubemap.frag" />
     <None Include="reflection_cubemap.vert" />
