@@ -824,7 +824,7 @@ int runScene2() {
 	// shader configuration
 	// --------------------
 	shader.use();
-	shader.setInt("texture1", 0);
+	//shader.setInt("texture_diffuse1", 0);
 
 	skyboxShader.use();
 	skyboxShader.setInt("cubemap", 0);
@@ -919,12 +919,12 @@ int runScene2() {
 		glClearColor(0.025f, 0.025f, 0.025f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 
 		// draw scene to custom framebuffer
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 300.0f);
 
 		// Update uniform blocks
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -966,7 +966,7 @@ int runScene2() {
 		*/
 
 		// Planet rendering
-		glCullFace(GL_FRONT);
+		//glCullFace(GL_FRONT);
 		shader.use();
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, planetPosition);
@@ -975,12 +975,12 @@ int runScene2() {
 		planet.Draw(shader);
 
 		// draw asteroids
-		glDisable(GL_CULL_FACE);
+		//glDisable(GL_CULL_FACE);
 		for (unsigned int i = 0; i < amount; i++) {
 			shader.setMat4("model", modelMatrices[i]);
 			rock.Draw(shader);
 		}
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 		
 		/*
 		shader.use();
