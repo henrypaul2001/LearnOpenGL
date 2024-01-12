@@ -842,12 +842,14 @@ int runScene2() {
 	unsigned int depth_testingBlockLocation = glGetUniformBlockIndex(shader.GetID(), "Matrices");
 	unsigned int explodeBlockLocation = glGetUniformBlockIndex(explodeShader.GetID(), "Matrices");
 	unsigned int showNormalsBlockLocation = glGetUniformBlockIndex(showNormalsShader.GetID(), "Matrices");
+	unsigned int instancingBlockLocation = glGetUniformBlockIndex(instancingShader.GetID(), "Matrices");
 
 	glUniformBlockBinding(skyboxShader.GetID(), skyboxBlockLocation, 0);
 	glUniformBlockBinding(cubemapReflectionShader.GetID(), reflection_cubemapBlockLocation, 0);
 	glUniformBlockBinding(shader.GetID(), depth_testingBlockLocation, 0);
 	glUniformBlockBinding(explodeShader.GetID(), explodeBlockLocation, 0);
 	glUniformBlockBinding(showNormalsShader.GetID(), showNormalsBlockLocation, 0);
+	glUniformBlockBinding(instancingShader.GetID(), instancingBlockLocation, 0);
 
 	unsigned int uboMatrices;
 	glGenBuffers(1, &uboMatrices);
@@ -864,13 +866,13 @@ int runScene2() {
 	Model rock = Model("Models/rock/rock.obj");
 
 	// Generate offsets for asteroids
-	glm::vec3 planetPosition = glm::vec3(0.0f, -3.0f, -50.0f);
-	unsigned int amount = 10000;
+	glm::vec3 planetPosition = glm::vec3(0.0f, -33.0f, -250.0f);
+	unsigned int amount = 100000;
 	glm::mat4* modelMatrices;
 	modelMatrices = new glm::mat4[amount];
 	srand(glfwGetTime()); // initialize random seed
-	float radius = 50.0f;
-	offset = 2.5f;
+	float radius = 225.0f;
+	offset = 25.0f;
 	for (unsigned int i = 0; i < amount; i++) {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, planetPosition);
@@ -895,6 +897,33 @@ int runScene2() {
 
 		// add to list
 		modelMatrices[i] = model;
+	}
+
+	unsigned int buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+
+	for (unsigned int i = 0; i < rock.meshes.size(); i++)
+	{
+		unsigned int VAO = rock.meshes[i].VAO;
+		glBindVertexArray(VAO);
+		
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+		glVertexAttribDivisor(3, 1);
+		glVertexAttribDivisor(4, 1);
+		glVertexAttribDivisor(5, 1);
+		glVertexAttribDivisor(6, 1);
+
+		glBindVertexArray(0);
 	}
 
 	// render loop
@@ -924,7 +953,7 @@ int runScene2() {
 		// draw scene to custom framebuffer
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 300.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 600.0f);
 
 		// Update uniform blocks
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -970,15 +999,20 @@ int runScene2() {
 		shader.use();
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, planetPosition);
-		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+		model = glm::scale(model, glm::vec3(24.0f, 24.0f, 24.0f));
 		shader.setMat4("model", model);
 		planet.Draw(shader);
 
 		// draw asteroids
 		glDisable(GL_CULL_FACE);
-		for (unsigned int i = 0; i < amount; i++) {
-			shader.setMat4("model", modelMatrices[i]);
-			rock.Draw(shader);
+		instancingShader.use();
+		instancingShader.setInt("texture_diffuse1", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, rock.textures_loaded[0].id);
+		for (unsigned int i = 0; i < rock.meshes.size(); i++) {
+			glBindVertexArray(rock.meshes[i].VAO);
+			glDrawElementsInstanced(GL_TRIANGLES, rock.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount);
+			glBindVertexArray(0);
 		}
 		glEnable(GL_CULL_FACE);
 		
