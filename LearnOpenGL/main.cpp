@@ -812,12 +812,12 @@ int runScene2() {
 	unsigned int transparentTexture = LoadTexture("Textures/window.png", GL_CLAMP_TO_EDGE);
 
 	std::vector<std::string> skyboxFaces{
-		"Textures/Skybox/right.jpg",
-		"Textures/Skybox/left.jpg",
-		"Textures/Skybox/top.jpg",
-		"Textures/Skybox/bottom.jpg",
-		"Textures/Skybox/front.jpg",
-		"Textures/Skybox/back.jpg"
+		"Textures/Space/right.png",
+		"Textures/Space/left.png",
+		"Textures/Space/top.png",
+		"Textures/Space/bottom.png",
+		"Textures/Space/front.png",
+		"Textures/Space/back.png"
 	};
 	unsigned int skyboxTexture = LoadCubemap(skyboxFaces);
 
@@ -865,7 +865,7 @@ int runScene2() {
 
 	// Generate offsets for asteroids
 	glm::vec3 planetPosition = glm::vec3(0.0f, -3.0f, -50.0f);
-	unsigned int amount = 1000;
+	unsigned int amount = 10000;
 	glm::mat4* modelMatrices;
 	modelMatrices = new glm::mat4[amount];
 	srand(glfwGetTime()); // initialize random seed
@@ -919,7 +919,7 @@ int runScene2() {
 		glClearColor(0.025f, 0.025f, 0.025f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 
 		// draw scene to custom framebuffer
 		glm::mat4 model = glm::mat4(1.0f);
@@ -966,7 +966,7 @@ int runScene2() {
 		*/
 
 		// Planet rendering
-		//glCullFace(GL_FRONT);
+		glCullFace(GL_FRONT);
 		shader.use();
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, planetPosition);
@@ -975,12 +975,12 @@ int runScene2() {
 		planet.Draw(shader);
 
 		// draw asteroids
-		//glDisable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 		for (unsigned int i = 0; i < amount; i++) {
 			shader.setMat4("model", modelMatrices[i]);
 			rock.Draw(shader);
 		}
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 		
 		/*
 		shader.use();
@@ -1018,7 +1018,7 @@ int runScene2() {
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
+		*/
 		// render skybox
 		glDepthFunc(GL_LEQUAL);
 		glCullFace(GL_FRONT);
@@ -1040,7 +1040,7 @@ int runScene2() {
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+		/*
 		// cube outlines
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilMask(0x00);
