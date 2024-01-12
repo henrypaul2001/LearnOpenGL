@@ -160,6 +160,9 @@
     <None Include="geometry_shaders.vert" />
     <None Include="reflection_cubemap.frag" />
     <None Include="reflection_cubemap.vert" />
+    <None Include="showNormals.frag" />
+    <None Include="showNormals.geom" />
+    <None Include="showNormals.vert" />
     <None Include="skybox.frag" />
     <None Include="skybox.vert" />
     <None Include="depth_testing.frag" />

@@ -136,5 +136,14 @@
     <None Include="explode.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="showNormals.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="showNormals.geom">
+      <Filter>Source Files\Shaders\Geometry</Filter>
+    </None>
+    <None Include="showNormals.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

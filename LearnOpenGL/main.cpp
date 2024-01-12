@@ -559,6 +559,7 @@ int runScene2() {
 	Shader cubemapReflectionShader("reflection_cubemap.vert", "reflection_cubemap.frag");
 	Shader geometryShader("geometry_shaders.vert", "geometry_shaders.frag", "geometry_shaders.geom");
 	Shader explodeShader("explode.vert", "explode.frag", "explode.geom");
+	Shader showNormalsShader("showNormals.vert", "showNormals.frag", "showNormals.geom");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -793,12 +794,14 @@ int runScene2() {
 	unsigned int skyboxBlockLocation = glGetUniformBlockIndex(skyboxShader.GetID(), "Matrices");
 	unsigned int reflection_cubemapBlockLocation = glGetUniformBlockIndex(cubemapReflectionShader.GetID(), "Matrices");
 	unsigned int depth_testingBlockLocation = glGetUniformBlockIndex(shader.GetID(), "Matrices");
-	unsigned int explodeBlockLocation = glGetUniformBlockIndex(shader.GetID(), "Matrices");
+	unsigned int explodeBlockLocation = glGetUniformBlockIndex(explodeShader.GetID(), "Matrices");
+	unsigned int showNormalsBlockLocation = glGetUniformBlockIndex(showNormalsShader.GetID(), "Matrices");
 
 	glUniformBlockBinding(skyboxShader.GetID(), skyboxBlockLocation, 0);
 	glUniformBlockBinding(cubemapReflectionShader.GetID(), reflection_cubemapBlockLocation, 0);
 	glUniformBlockBinding(shader.GetID(), depth_testingBlockLocation, 0);
 	glUniformBlockBinding(explodeShader.GetID(), explodeBlockLocation, 0);
+	glUniformBlockBinding(showNormalsShader.GetID(), showNormalsBlockLocation, 0);
 
 	unsigned int uboMatrices;
 	glGenBuffers(1, &uboMatrices);
@@ -855,11 +858,18 @@ int runScene2() {
 		glCullFace(GL_BACK);
 		*/
 
-		explodeShader.use();
-		explodeShader.setFloat("time", glfwGetTime());
+		// Draw normally first
+		shader.use();
+		//shader.setFloat("time", glfwGetTime());
+		glCullFace(GL_FRONT);
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-		explodeShader.setMat4("model", model);
-		backpack.Draw(explodeShader);
+		shader.setMat4("model", model);
+		backpack.Draw(shader);
+
+		// Draw again with normals shader
+		showNormalsShader.use();
+		showNormalsShader.setMat4("model", model);
+		backpack.Draw(showNormalsShader);
 
 		/*
 		shader.use();
