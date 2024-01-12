@@ -158,6 +158,8 @@
     <None Include="geometry_shaders.frag" />
     <None Include="geometry_shaders.geom" />
     <None Include="geometry_shaders.vert" />
+    <None Include="instancing.frag" />
+    <None Include="instancing.vert" />
     <None Include="reflection_cubemap.frag" />
     <None Include="reflection_cubemap.vert" />
     <None Include="showNormals.frag" />

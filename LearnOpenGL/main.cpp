@@ -560,6 +560,7 @@ int runScene2() {
 	Shader geometryShader("geometry_shaders.vert", "geometry_shaders.frag", "geometry_shaders.geom");
 	Shader explodeShader("explode.vert", "explode.frag", "explode.geom");
 	Shader showNormalsShader("showNormals.vert", "showNormals.frag", "showNormals.geom");
+	Shader instancingShader("instancing.vert", "instancing.frag");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -688,6 +689,15 @@ int runScene2() {
 		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
 		-0.5f, -0.5f, 1.0f, 1.0f, 0.0f // bottom-left
 	};
+	float instancedQuadVertices[] = {
+		// positions // colors
+		-0.05f, 0.05f,	 1.0f, 0.0f, 0.0f,
+		0.05f, -0.05f,	 0.0f, 1.0f, 0.0f,
+		-0.05f, -0.05f,	 0.0f, 0.0f, 1.0f,
+		-0.05f, 0.05f,	 1.0f, 0.0f, 0.0f,
+		0.05f, -0.05f,	 0.0f, 1.0f, 0.0f,
+		0.05f, 0.05f,	 0.0f, 1.0f, 1.0f
+	};
 	// cube VAO
 	unsigned int cubeVAO, cubeVBO;
 	glGenVertexArrays(1, &cubeVAO);
@@ -758,7 +768,18 @@ int runScene2() {
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
-	
+	// instanced quad VAO
+	unsigned int iQuadVAO, iQuadVBO;
+	glGenVertexArrays(1, &iQuadVAO);
+	glGenBuffers(1, &iQuadVBO);
+	glBindVertexArray(iQuadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, iQuadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(instancedQuadVertices), &instancedQuadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+
 	// load textures
 	// -------------
 	unsigned int cubeTexture = LoadTexture("Textures/marble.jpg", GL_REPEAT);
@@ -815,6 +836,25 @@ int runScene2() {
 	stbi_set_flip_vertically_on_load(true);
 	Model backpack = Model("Models/backpack/backpack.obj");
 
+	// Populate offset positions for instancing shader
+	glm::vec2 translations[100];
+	glm::vec2 translation;
+	int index = 0;
+	float offset = 0.1f;
+	for (int y = -10; y < 10; y += 2) {
+		for (int x = -10; x < 10; x += 2) {
+			translation.x = (float)x / 10.0f + offset;
+			translation.y = (float)y / 10.0f + offset;
+			translations[index++] = translation;
+		}
+	}
+
+	// Update instancing shader uniform
+	instancingShader.use();
+	for (unsigned int i = 0; i < 100; i++) {
+		instancingShader.setVec2(("offsets[" + std::to_string(i) + "]"), translations[i]);
+	}
+
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -858,6 +898,8 @@ int runScene2() {
 		glCullFace(GL_BACK);
 		*/
 
+		// Geometry shader demonstration
+		/*
 		// Draw normally first
 		shader.use();
 		//shader.setFloat("time", glfwGetTime());
@@ -870,6 +912,14 @@ int runScene2() {
 		showNormalsShader.use();
 		showNormalsShader.setMat4("model", model);
 		backpack.Draw(showNormalsShader);
+		*/
+
+		// Instancing demonstration
+		glDisable(GL_CULL_FACE);
+		instancingShader.use();
+		glBindVertexArray(iQuadVAO);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
+		glEnable(GL_CULL_FACE);
 
 		/*
 		shader.use();

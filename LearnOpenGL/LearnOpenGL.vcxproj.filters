@@ -145,5 +145,11 @@
     <None Include="showNormals.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="instancing.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="instancing.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>
