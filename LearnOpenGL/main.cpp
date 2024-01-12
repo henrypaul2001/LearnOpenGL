@@ -860,6 +860,42 @@ int runScene2() {
 	// Model loading
 	stbi_set_flip_vertically_on_load(true);
 	Model backpack = Model("Models/backpack/backpack.obj");
+	Model planet = Model("Models/planet/planet.obj");
+	Model rock = Model("Models/rock/rock.obj");
+
+	// Generate offsets for asteroids
+	glm::vec3 planetPosition = glm::vec3(0.0f, -3.0f, -50.0f);
+	unsigned int amount = 1000;
+	glm::mat4* modelMatrices;
+	modelMatrices = new glm::mat4[amount];
+	srand(glfwGetTime()); // initialize random seed
+	float radius = 50.0f;
+	offset = 2.5f;
+	for (unsigned int i = 0; i < amount; i++) {
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, planetPosition);
+
+		// translation along circle radius
+		float angle = (float)i / (float)amount * 360.0f;
+		float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+		float x = sin(angle) * radius + displacement;
+		displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+		float y = displacement * 0.4f;
+		displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+		float z = cos(angle) * radius + displacement;
+		model = glm::translate(model, glm::vec3(x, y, z));
+
+		// scale
+		float scale = (rand() % 20) / 100.0f + 0.05f;
+		model = glm::scale(model, glm::vec3(scale));
+
+		// rotate
+		float rotationAngle = (rand() % 360);
+		model = glm::rotate(model, rotationAngle, glm::vec3(0.4f, 0.6f, 0.8f));
+
+		// add to list
+		modelMatrices[i] = model;
+	}
 
 	// render loop
 	// -----------
@@ -880,7 +916,7 @@ int runScene2() {
 		
 		// FIRST PASS
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.025f, 0.025f, 0.025f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -921,12 +957,31 @@ int runScene2() {
 		*/
 
 		// Instancing demonstration
+		/*
 		glDisable(GL_CULL_FACE);
 		instancingShader.use();
 		glBindVertexArray(iQuadVAO);
 		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
 		glEnable(GL_CULL_FACE);
+		*/
 
+		// Planet rendering
+		glCullFace(GL_FRONT);
+		shader.use();
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, planetPosition);
+		model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+		shader.setMat4("model", model);
+		planet.Draw(shader);
+
+		// draw asteroids
+		glDisable(GL_CULL_FACE);
+		for (unsigned int i = 0; i < amount; i++) {
+			shader.setMat4("model", modelMatrices[i]);
+			rock.Draw(shader);
+		}
+		glEnable(GL_CULL_FACE);
+		
 		/*
 		shader.use();
 
@@ -1054,6 +1109,7 @@ int runScene2() {
 	glDeleteBuffers(1, &quadVBO);
 	glDeleteRenderbuffers(1, &rbo);
 	glDeleteFramebuffers(1, &framebuffer);
+	delete(modelMatrices);
 
 	glfwTerminate();
 	return 0;
