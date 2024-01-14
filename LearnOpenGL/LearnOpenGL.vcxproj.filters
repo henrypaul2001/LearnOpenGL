@@ -151,5 +151,11 @@
     <None Include="instancing.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="advanced_lighting.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="advanced_lighting.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>
