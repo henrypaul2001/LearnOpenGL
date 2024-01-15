@@ -157,5 +157,23 @@
     <None Include="advanced_lighting.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="depthMap.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="depthMap.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="depthDebug.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="depthDebug.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="shadow_mapping.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="shadow_mapping.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>
