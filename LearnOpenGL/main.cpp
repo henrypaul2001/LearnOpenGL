@@ -56,6 +56,7 @@ float lastFrame = 0.0f;
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 const unsigned int MSAASamples = 4;
+const bool gammaCorrection = true;
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	camera.ProcessMouseScroll(yoffset);
@@ -111,16 +112,23 @@ unsigned int LoadTexture(const char* filepath, GLenum wrap) {
 	unsigned char* data = stbi_load(filepath, &width, &height, &nrComponents, 0);
 	if (data)
 	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_SRGB;
-		else if (nrComponents == 4)
-			format = GL_SRGB_ALPHA;
+		GLenum internalFormat;
+		GLenum dataFormat;
+		if (nrComponents == 1) {
+			internalFormat = GL_RED;
+			dataFormat = GL_RED;
+		}
+		else if (nrComponents == 3) {
+			internalFormat = gammaCorrection ? GL_SRGB : GL_RGB;
+			dataFormat = GL_RGB;
+		}
+		else if (nrComponents == 4) {
+			internalFormat = gammaCorrection ? GL_SRGB_ALPHA : GL_RGBA;
+			dataFormat = GL_RGBA;
+		}
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -1252,10 +1260,22 @@ int runScene3() {
 	// --------------------
 	shader.use();
 	shader.setInt("texture1", 0);
+	shader.setBool("gamma", gammaCorrection);
 
 	// lighting info
 	// -------------
-	glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+	glm::vec3 lightPositions[] = {
+		glm::vec3(-3.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(3.0f, 0.0f, 0.0f)
+	};
+	glm::vec3 lightColors[] = {
+		glm::vec3(0.25),
+		glm::vec3(0.50),
+		glm::vec3(0.75),
+		glm::vec3(1.00)
+	};
 
 	// render loop
 	// -----------
@@ -1283,9 +1303,9 @@ int runScene3() {
 		shader.setMat4("projection", projection);
 		shader.setMat4("view", view);
 		// set light uniforms
+		glUniform3fv(glGetUniformLocation(shader.GetID(), "lightPositions"), 4, &lightPositions[0][0]);
+		glUniform3fv(glGetUniformLocation(shader.GetID(), "lightColors"), 4, &lightColors[0][0]);
 		shader.setVec3("viewPos", camera.Position);
-		shader.setVec3("lightPos", lightPos);
-		shader.setInt("blinn", true);
 		// floor
 		glBindVertexArray(planeVAO);
 		glActiveTexture(GL_TEXTURE0);
