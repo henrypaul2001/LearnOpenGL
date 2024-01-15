@@ -89,4 +89,6 @@ vec4 Kernel(float[9] kernel) {
 
 void main() {
 	FragColor = NoEffect();
+	float gamma = 2.2;
+	FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / gamma));
 }

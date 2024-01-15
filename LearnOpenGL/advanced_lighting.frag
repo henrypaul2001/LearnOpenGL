@@ -40,5 +40,5 @@ void main()
     FragColor = vec4(ambient + diffuse + specular, 1.0);
 
     float gamma = 2.2;
-    FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / gamma));
+    FragColor.rgb = pow(FragColor.rgb, vec3(1.0 / gamma)); // not best solution, as this would require gamma correction in every fragment shader used. Better to use as post processing on a final render quad
 }
