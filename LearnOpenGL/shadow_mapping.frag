@@ -21,6 +21,10 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
+    
+    if (projCoords.z > 1.0) {
+        return 0.0;
+    }
 
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
     float closestDepth = texture(shadowMap, projCoords.xy).r; 
@@ -32,9 +36,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     vec3 normal = normalize(fs_in.Normal);
     vec3 lightDir = normalize(lightPos - fs_in.FragPos);
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-
-    return shadow;
+    return currentDepth - bias > closestDepth  ? 1.0 : 0.0;
 }
 
 void main()
