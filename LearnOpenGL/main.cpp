@@ -254,10 +254,12 @@ void RenderScene3Old(Shader& shader, glm::vec3* lightPositions, glm::vec3* light
 
 void RenderScene3(const Shader& shader, unsigned int& planeVAO, unsigned int& cubeVAO) {
 	// floor
+	glCullFace(GL_FRONT);
 	glm::mat4 model = glm::mat4(1.0f);
 	shader.setMat4("model", model);
 	glBindVertexArray(planeVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glCullFace(GL_BACK);
 
 	// cubes
 	model = glm::mat4(1.0f);
@@ -1449,6 +1451,11 @@ int runScene3() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 		// first render to depth map
+
+		// front face culling to fix shadow peter panning
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
 		lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
@@ -1470,6 +1477,7 @@ int runScene3() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// render scene as normal using the generated shadow map
+		glCullFace(GL_BACK);
 		shadowMappingShader.use();
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
