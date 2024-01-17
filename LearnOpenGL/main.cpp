@@ -1753,7 +1753,7 @@ int runScene4() {
 		processInput(window);
 
 		// move light position over time
-
+		lightPos.z = static_cast<float>(sin(glfwGetTime() * 0.5) * 3.0);
 
 		// render
 		// ------
