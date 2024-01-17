@@ -175,5 +175,20 @@
     <None Include="shadow_mapping.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="point_shadows.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="point_shadows.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="point_shadows_depth.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="point_shadows_depth.geom">
+      <Filter>Source Files\Shaders\Geometry</Filter>
+    </None>
+    <None Include="point_shadows_depth.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

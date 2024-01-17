@@ -166,6 +166,11 @@
     <None Include="geometry_shaders.vert" />
     <None Include="instancing.frag" />
     <None Include="instancing.vert" />
+    <None Include="point_shadows.frag" />
+    <None Include="point_shadows.vert" />
+    <None Include="point_shadows_depth.frag" />
+    <None Include="point_shadows_depth.geom" />
+    <None Include="point_shadows_depth.vert" />
     <None Include="reflection_cubemap.frag" />
     <None Include="reflection_cubemap.vert" />
     <None Include="shadow_mapping.frag" />
