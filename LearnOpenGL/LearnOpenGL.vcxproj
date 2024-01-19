@@ -166,6 +166,8 @@
     <None Include="geometry_shaders.vert" />
     <None Include="instancing.frag" />
     <None Include="instancing.vert" />
+    <None Include="normal_mapping.frag" />
+    <None Include="normal_mapping.vert" />
     <None Include="point_shadows.frag" />
     <None Include="point_shadows.vert" />
     <None Include="point_shadows_depth.frag" />
