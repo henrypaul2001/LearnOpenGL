@@ -9,21 +9,23 @@ in VS_OUT {
     vec3 TangentFragPos;
 } fs_in;
 
-uniform sampler2D diffuseMap;
-uniform sampler2D normalMap;
+uniform sampler2D texture_diffuse;
+uniform sampler2D texture_normal;
+uniform sampler2D texture_specular;
+uniform bool useSpecularMap;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 
 void main() {
     // obtain normal from normal map
-    vec3 normal = texture(normalMap, fs_in.TexCoords).rgb;
+    vec3 normal = normalize(texture(texture_normal, fs_in.TexCoords)).rgb;
 
     // transpose normal vector to range -1, 1
     normal = normalize(normal * 2.0 - 1.0); // tangent space
 
      // get diffuse color
-    vec3 color = texture(diffuseMap, fs_in.TexCoords).rgb;
+    vec3 color = texture(texture_diffuse, fs_in.TexCoords).rgb;
 
     // ambient
     vec3 ambient = 0.1 * color;
@@ -39,6 +41,13 @@ void main() {
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 
-    vec3 specular = vec3(0.2) * spec;
+    vec3 specular;
+    if (useSpecularMap) {
+        specular = vec3(0.2) * spec * vec3(texture(texture_specular, fs_in.TexCoords));
+    }
+    else {
+        specular = vec3(0.2) * spec;
+    }
+
     FragColor = vec4(ambient + diffuse + specular, 1.0);
 }

@@ -10,7 +10,7 @@ void Model::Draw(Shader& shader)
 void Model::loadModel(std::string filepath)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -59,6 +59,14 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			vec.x = mesh->mTextureCoords[0][i].x;
 			vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.TexCoords = vec;
+			// tangent
+			vertex.Tangent.x = mesh->mTangents[i].x;
+			vertex.Tangent.y = mesh->mTangents[i].y;
+			vertex.Tangent.z = mesh->mTangents[i].z;
+			// bitangent
+			vertex.Bitangent.x = mesh->mBitangents[i].x;
+			vertex.Bitangent.y = mesh->mBitangents[i].y;
+			vertex.Bitangent.z = mesh->mBitangents[i].z;
 		}
 		else {
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
@@ -84,6 +92,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
+		//std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+		//textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 	}
 
 	return Mesh(vertices, indices, textures);

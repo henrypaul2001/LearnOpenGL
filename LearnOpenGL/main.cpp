@@ -1965,6 +1965,12 @@ int runScene5() {
 	// -------------
 	glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
 
+	// Model loading
+	Model cyborg = Model("Models/cyborg/cyborg.obj");
+
+	stbi_set_flip_vertically_on_load(true);
+	Model backpack = Model("Models/backpack/backpack.obj");
+
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -1997,6 +2003,7 @@ int runScene5() {
 		shader.setMat4("model", model);
 		shader.setVec3("viewPos", camera.Position);
 		shader.setVec3("lightPos", lightPos);
+		shader.setBool("useSpecularMap", false);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -2005,6 +2012,21 @@ int runScene5() {
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
+
+		
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(1.0f, -2.5f, 2.0f));
+		shader.setMat4("model", model);
+		shader.setBool("useSpecularMap", true);
+		cyborg.Draw(shader);
+
+		
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(1.0f, -2.5f, 2.0f));
+		shader.setMat4("model", model);
+		shader.setBool("useSpecularMap", true);
+		backpack.Draw(shader);
+		
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
