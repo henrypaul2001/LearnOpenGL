@@ -1955,15 +1955,21 @@ int runScene5() {
 	unsigned int diffuseMap = LoadTexture("Textures/brickwall.jpg", GL_REPEAT);
 	unsigned int normalMap = LoadTexture("Textures/brickwall_normal.jpg", GL_REPEAT);
 
+	unsigned int brick2Diffuse = LoadTexture("Textures/bricks2.jpg", GL_REPEAT);
+	unsigned int brick2Normal = LoadTexture("Textures/bricks2_normal.jpg", GL_REPEAT);
+	unsigned int brick2Height = LoadTexture("Textures/bricks2_disp.jpg", GL_REPEAT);
+
 	// shader configuration
 	// --------------------
 	shader.use();
-	shader.setInt("diffuseMap", 0);
-	shader.setInt("normalMap", 1);
+	shader.setInt("texture_diffuse", 0);
+	shader.setInt("texture_specular", 1);
+	shader.setInt("texture_normal", 2);
+	shader.setInt("texture_height", 3);
 
 	// lighting info
 	// -------------
-	glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
+	glm::vec3 lightPos(0.0f, 0.0f, 2.5f);
 
 	// Model loading
 	Model cyborg = Model("Models/cyborg/cyborg.obj");
@@ -1999,32 +2005,54 @@ int runScene5() {
 
 		// render normal-mapped quad
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0))); // rotate the quad to show normal mapping from multiple directions
+		//model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0))); // rotate the quad to show normal mapping from multiple directions
 		shader.setMat4("model", model);
 		shader.setVec3("viewPos", camera.Position);
 		shader.setVec3("lightPos", lightPos);
 		shader.setBool("useSpecularMap", false);
+		shader.setBool("useHeightMap", false);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, normalMap);
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(2.25f, 0.0f, 0.0f));
+		shader.setMat4("model", model);
+		shader.setBool("useSpecularMap", false);
+		shader.setBool("useHeightMap", true);
+		shader.setFloat("height_scale", 1.5f);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, brick2Diffuse);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, brick2Normal);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, brick2Height);
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 
 		
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.0f, -2.5f, 2.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
 		shader.setMat4("model", model);
 		shader.setBool("useSpecularMap", true);
+		shader.setBool("useHeightMap", false);
 		cyborg.Draw(shader);
 
 		
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.0f, -2.5f, 2.0f));
+		model = glm::translate(model, glm::vec3(2.25f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
 		shader.setMat4("model", model);
 		shader.setBool("useSpecularMap", true);
+		shader.setBool("useHeightMap", false);
 		backpack.Draw(shader);
 		
 
