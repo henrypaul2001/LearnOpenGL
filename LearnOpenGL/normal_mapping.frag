@@ -22,20 +22,54 @@ uniform bool useSpecularMap;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 
+const float minLayers = 8.0;
+const float maxLayers = 32.0;
+
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir) {
-    float height = texture(texture_height, texCoords).r;
-    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
-    return texCoords - p;
+    // number of depth layers
+    float numLayers = mix(maxLayers, minLayers, max(dot(vec3(0.0, 0.0, 1.0), viewDir), 0.0));;
+
+    // calculate size of each layer
+    float layerDepth = 1.0 / numLayers;
+
+    // depth of current layerDepth
+    float currentLayerDepth = 0.0;
+
+    // amount to shift the texture coordinates per layer
+    vec2 P = viewDir.xy * height_scale;
+    vec2 deltaTexCoords = P / numLayers;
+
+    // get initial values
+    vec2 currentTexCoords = texCoords;
+    float currentDepthMapValue = texture(texture_height, currentTexCoords).r;
+
+    while (currentLayerDepth < currentDepthMapValue) {
+        // shift texture coordinates along direction of P
+        currentTexCoords -= deltaTexCoords;
+
+        // get depth map value at current coords
+        currentDepthMapValue = texture(texture_height, currentTexCoords).r;
+
+        // get depth of next layer
+        currentLayerDepth += layerDepth;
+    }
+
+    return currentTexCoords;
+
+    //float height = texture(texture_height, texCoords).r;
+    //vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
+    //return texCoords - p;
 }
 
 void main() {
     // offset texture coordinates with parallax mapping
     vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec2 texCoords = fs_in.TexCoords;
+
     if (useHeightMap) {
-        vec2 texCoords = ParallaxMapping(fs_in.TexCoords, viewDir);
+        texCoords = ParallaxMapping(texCoords, viewDir);
         if (texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0) {
-            //discard;
+            discard;
         }
     }
 
@@ -64,7 +98,7 @@ void main() {
 
     vec3 specular;
     if (useSpecularMap) {
-        specular = vec3(0.2) * spec * vec3(texture(texture_specular, fs_in.TexCoords));
+        specular = vec3(0.2) * spec * vec3(texture(texture_specular, texCoords));
     }
     else {
         specular = vec3(0.2) * spec;

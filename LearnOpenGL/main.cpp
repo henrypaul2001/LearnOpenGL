@@ -53,6 +53,8 @@ bool fFlag;
 
 float lastFrame = 0.0f;
 
+float heightScale = 0.1f;
+
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 const unsigned int MSAASamples = 4;
@@ -98,7 +100,14 @@ void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 		fFlag = true;
 	}
-
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		heightScale -= 0.1f;
+		std::cout << "Height scale = " << heightScale << std::endl;
+	}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		heightScale += 0.1f;
+		std::cout << "Height scale = " << heightScale << std::endl;
+	}
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -1959,6 +1968,10 @@ int runScene5() {
 	unsigned int brick2Normal = LoadTexture("Textures/bricks2_normal.jpg", GL_REPEAT);
 	unsigned int brick2Height = LoadTexture("Textures/bricks2_disp.jpg", GL_REPEAT);
 
+	unsigned int toyBoxDiffuse = LoadTexture("Textures/toy_box_diffuse.png", GL_REPEAT);
+	unsigned int toyBoxNormal = LoadTexture("Textures/toy_box_normal.png", GL_REPEAT);
+	unsigned int toyBoxHeight = LoadTexture("Textures/toy_box_disp.png", GL_REPEAT);
+
 	// shader configuration
 	// --------------------
 	shader.use();
@@ -2005,7 +2018,7 @@ int runScene5() {
 
 		// render normal-mapped quad
 		glm::mat4 model = glm::mat4(1.0f);
-		//model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0))); // rotate the quad to show normal mapping from multiple directions
+		model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0))); // rotate the quad to show normal mapping from multiple directions
 		shader.setMat4("model", model);
 		shader.setVec3("viewPos", camera.Position);
 		shader.setVec3("lightPos", lightPos);
@@ -2020,12 +2033,13 @@ int runScene5() {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 
+		// Render brick wall
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(2.25f, 0.0f, 0.0f));
 		shader.setMat4("model", model);
 		shader.setBool("useSpecularMap", false);
 		shader.setBool("useHeightMap", true);
-		shader.setFloat("height_scale", 1.5f);
+		shader.setFloat("height_scale", heightScale);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, brick2Diffuse);
@@ -2033,6 +2047,24 @@ int runScene5() {
 		glBindTexture(GL_TEXTURE_2D, brick2Normal);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, brick2Height);
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		// Render toy box
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(1.65f, 2.25f, 0.0f));
+		shader.setMat4("model", model);
+		shader.setBool("useSpecularMap", false);
+		shader.setBool("useHeightMap", true);
+		shader.setFloat("height_scale", heightScale);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, toyBoxDiffuse);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, toyBoxNormal);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, toyBoxHeight);
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
