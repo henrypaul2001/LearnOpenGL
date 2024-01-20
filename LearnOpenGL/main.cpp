@@ -2018,7 +2018,7 @@ int runScene5() {
 
 		// render normal-mapped quad
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0))); // rotate the quad to show normal mapping from multiple directions
+		model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 0.0))); // rotate the quad to show normal mapping from multiple directions
 		shader.setMat4("model", model);
 		shader.setVec3("viewPos", camera.Position);
 		shader.setVec3("lightPos", lightPos);
@@ -2036,6 +2036,7 @@ int runScene5() {
 		// Render brick wall
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(2.25f, 0.0f, 0.0f));
+		//model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 0.0)));
 		shader.setMat4("model", model);
 		shader.setBool("useSpecularMap", false);
 		shader.setBool("useHeightMap", true);

@@ -54,11 +54,18 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir) {
         currentLayerDepth += layerDepth;
     }
 
-    return currentTexCoords;
+    // get texture coordinates before collision
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
 
-    //float height = texture(texture_height, texCoords).r;
-    //vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
-    //return texCoords - p;
+    // get depth after and before collision for linear interpolation
+    float afterDepth = currentDepthMapValue - currentLayerDepth;
+    float beforeDepth = texture(texture_height, prevTexCoords).r - currentLayerDepth + layerDepth;
+
+    // interpolation of texture coordinates
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+    return finalTexCoords;
 }
 
 void main() {
