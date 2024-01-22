@@ -164,8 +164,12 @@
     <None Include="geometry_shaders.frag" />
     <None Include="geometry_shaders.geom" />
     <None Include="geometry_shaders.vert" />
+    <None Include="hdr_shader.frag" />
+    <None Include="hdr_shader.vert" />
     <None Include="instancing.frag" />
     <None Include="instancing.vert" />
+    <None Include="lighting_hdr.frag" />
+    <None Include="lighting_hdr.vert" />
     <None Include="normal_mapping.frag" />
     <None Include="normal_mapping.vert" />
     <None Include="point_shadows.frag" />

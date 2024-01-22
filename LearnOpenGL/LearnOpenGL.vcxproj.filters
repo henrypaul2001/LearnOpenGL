@@ -196,5 +196,17 @@
     <None Include="normal_mapping.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="hdr_shader.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="hdr_shader.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="lighting_hdr.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="lighting_hdr.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>
