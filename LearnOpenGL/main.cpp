@@ -55,6 +55,9 @@ float lastFrame = 0.0f;
 
 float heightScale = 0.1f;
 
+bool hdr = true;
+float exposure = 1.0f;
+
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 const unsigned int MSAASamples = 4;
@@ -107,6 +110,14 @@ void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 		heightScale += 0.1f;
 		std::cout << "Height scale = " << heightScale << std::endl;
+	}
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+		exposure -= 0.1f;
+		std::cout << "Exposure = " << exposure << std::endl;
+	}
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+		exposure += 0.1f;
+		std::cout << "Exposure = " << exposure << std::endl;
 	}
 }
 
@@ -2280,9 +2291,6 @@ int runScene6() {
 	hdrShader.use();
 	hdrShader.setInt("hdrBuffer", 0);
 
-	bool hdr = true;
-	float exposure = 1.0f;
-
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -2343,8 +2351,6 @@ int runScene6() {
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-
-		//std::cout << "hdr: " << (hdr ? "on" : "off") << "| exposure: " << exposure << std::endl;
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
