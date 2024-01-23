@@ -58,6 +58,8 @@ float heightScale = 0.1f;
 bool hdr = true;
 float exposure = 1.0f;
 
+int bloomPasses = 5;
+
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 const unsigned int MSAASamples = 4;
@@ -118,6 +120,16 @@ void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
 		exposure += 0.1f;
 		std::cout << "Exposure = " << exposure << std::endl;
+	}
+	if (glfwGetKey(window, GLFW_KEY_9) == GLFW_PRESS) {
+		if (bloomPasses > 0) {
+			bloomPasses -= 1;
+		}
+		std::cout << "Bloom passes = " << bloomPasses << std::endl;
+	}
+	if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
+		bloomPasses += 1;
+		std::cout << "Bloom passes = " << bloomPasses << std::endl;
 	}
 }
 
@@ -2581,6 +2593,8 @@ int runScene7() {
 	shaderBloomFinal.setInt("scene", 0);
 	shaderBloomFinal.setInt("bloomBlur", 1);
 
+	std::cout << "Bloom passes = " << bloomPasses << std::endl;
+	std::cout << "Exposure = " << exposure << std::endl;
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -2710,7 +2724,7 @@ int runScene7() {
 		// 2. blur bright fragments with two-pass Gaussian Blur 
 		// --------------------------------------------------
 		bool horizontal = true, first_iteration = true;
-		unsigned int amount = 10;
+		unsigned int amount = bloomPasses;
 		shaderBlur.use();
 		for (unsigned int i = 0; i < amount; i++) {
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
