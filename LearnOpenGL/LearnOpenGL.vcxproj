@@ -154,6 +154,12 @@
   <ItemGroup>
     <None Include="advanced_lighting.frag" />
     <None Include="advanced_lighting.vert" />
+    <None Include="bloom.frag" />
+    <None Include="bloom.vert" />
+    <None Include="bloom_final.frag" />
+    <None Include="bloom_final.vert" />
+    <None Include="blur.frag" />
+    <None Include="blur.vert" />
     <None Include="depthDebug.frag" />
     <None Include="depthDebug.vert" />
     <None Include="depthMap.frag" />
@@ -168,6 +174,7 @@
     <None Include="hdr_shader.vert" />
     <None Include="instancing.frag" />
     <None Include="instancing.vert" />
+    <None Include="lightBox.frag" />
     <None Include="lighting_hdr.frag" />
     <None Include="lighting_hdr.vert" />
     <None Include="normal_mapping.frag" />
