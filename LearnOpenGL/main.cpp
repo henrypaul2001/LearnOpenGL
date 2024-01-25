@@ -3003,10 +3003,10 @@ int runScene8() {
 
 	// shader configuration
 	// --------------------
-	//shaderLightingPass.use();
-	//shaderLightingPass.setInt("gPosition", 0);
-	//shaderLightingPass.setInt("gNormal", 1);
-	//shaderLightingPass.setInt("gAlbedoSpec", 2);
+	shaderLightingPass.use();
+	shaderLightingPass.setInt("gPosition", 0);
+	shaderLightingPass.setInt("gNormal", 1);
+	shaderLightingPass.setInt("gAlbedoSpec", 2);
 
 	// render loop
 	// -----------
@@ -3029,6 +3029,22 @@ int runScene8() {
 
 		// 1. geometry pass: render scene's geometry/color data into gbuffer
 		// -----------------------------------------------------------------
+		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 model = glm::mat4(1.0f);
+		shaderGeometryPass.use();
+		shaderGeometryPass.setMat4("projection", projection);
+		shaderGeometryPass.setMat4("view", view);
+		for (unsigned int i = 0; i < objectPositions.size(); i++) {
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, objectPositions[i]);
+			model = glm::scale(model, glm::vec3(0.5f));
+			shaderGeometryPass.setMat4("model", model);
+			backpack.Draw(shaderGeometryPass);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// 2. lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
 		// -----------------------------------------------------------------------------------------------------------------------
