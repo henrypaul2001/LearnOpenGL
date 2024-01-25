@@ -12,7 +12,7 @@ struct Light {
 	vec3 Color;
 
 	float Linear;
-	float Quadtratic;
+	float Quadratic;
 };
 const int NR_LIGHTS = 32;
 uniform Light lights[NR_LIGHTS];
@@ -40,7 +40,7 @@ void main() {
 
 		// attenuation
 		float distance = length(lights[i].Position - FragPos);
-		float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadtratic * distance * distance);
+		float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance);
 		diffuse *= attenuation;
 		specular *= attenuation;
 		lighting += diffuse + specular;
