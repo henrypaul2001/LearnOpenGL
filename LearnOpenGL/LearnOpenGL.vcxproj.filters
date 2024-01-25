@@ -229,5 +229,23 @@
     <None Include="bloom_final.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="deferred_light_box.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="deferred_shading.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="g_buffer.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="g_buffer.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="deferred_shading.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="deferred_light_box.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>
