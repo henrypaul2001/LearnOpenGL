@@ -60,8 +60,8 @@ float exposure = 1.0f;
 
 int bloomPasses = 5;
 
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 3840;
+const unsigned int SCR_HEIGHT = 2160;
 const unsigned int MSAASamples = 4;
 const bool gammaCorrection = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
@@ -2918,7 +2918,7 @@ int runScene8() {
 	// build and compile shaders
 	// -------------------------
 	Shader shaderGeometryPass("g_buffer.vert", "g_buffer.frag");
-	Shader shaderLightingPass("deferred_shading.vert", "deferred_shading.frag");
+	Shader shaderLightingPass("deferred_shading.vert", "deferred_shading_volumes.frag");
 	Shader shaderLightBox("deferred_light_box.vert", "deferred_light_box.frag");
 
 	// load models
@@ -3048,6 +3048,7 @@ int runScene8() {
 
 		// 2. lighting pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
 		// -----------------------------------------------------------------------------------------------------------------------
+		glCullFace(GL_FRONT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		shaderLightingPass.use();
 		glActiveTexture(GL_TEXTURE0);
@@ -3059,12 +3060,17 @@ int runScene8() {
 		// send light uniforms
 		const float linear = 0.7f;
 		const float quadratic = 1.8f;
+		const float constant = 1.0f;
 		for (unsigned int i = 0; i < lightPositions.size(); i++) {
 			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
 			shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lightColors[i]);
 			// update attenuation parameters and calculate radius
 			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", linear);
 			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
+			// calculate radius of light volume
+			const float maxBrightness = std::max(std::fmaxf(lightColors[i].r, lightColors[i].g), lightColors[i].b);
+			float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2.0f * quadratic);
+			shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Radius", radius);
 		}
 		shaderLightingPass.setVec3("viewPos", camera.Position);
 		renderQuad();
@@ -3074,6 +3080,7 @@ int runScene8() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glCullFace(GL_BACK);
 
 		// 3. render lights on top of scene
 		// --------------------------------

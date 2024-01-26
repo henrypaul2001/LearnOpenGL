@@ -164,6 +164,7 @@
     <None Include="deferred_light_box.vert" />
     <None Include="deferred_shading.frag" />
     <None Include="deferred_shading.vert" />
+    <None Include="deferred_shading_volumes.frag" />
     <None Include="depthDebug.frag" />
     <None Include="depthDebug.vert" />
     <None Include="depthMap.frag" />
