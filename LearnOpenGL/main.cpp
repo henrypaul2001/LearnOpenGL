@@ -3311,10 +3311,6 @@ int runScene9() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shaderSSAO.use();
-		shaderSSAO.setInt("scr_width", SCR_WIDTH);
-		shaderSSAO.setInt("scr_height", SCR_HEIGHT);
-
 		// 1. geometry pass: render scene's geometry/color data into gbuffer
 		// -----------------------------------------------------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
@@ -3344,6 +3340,26 @@ int runScene9() {
 
 		// 2. generate SSAO texture
 		// ------------------------
+		glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+		glClear(GL_COLOR_BUFFER_BIT);
+		shaderSSAO.use();
+		shaderSSAO.setInt("scr_width", SCR_WIDTH);
+		shaderSSAO.setInt("scr_height", SCR_HEIGHT);
+
+		// Send kernel + rotation 
+		for (unsigned int i = 0; i < 64; ++i) {
+			shaderSSAO.setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+		}
+
+		shaderSSAO.setMat4("projection", projection);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gPosition);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, noiseTexture);
+		renderQuad();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// 3. blur SSAO texture to remove noise
 		// ------------------------------------
