@@ -61,8 +61,8 @@ float exposure = 1.0f;
 
 int bloomPasses = 5;
 
-const unsigned int SCR_WIDTH = 3840;
-const unsigned int SCR_HEIGHT = 2160;
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 720;
 const unsigned int MSAASamples = 4;
 const bool gammaCorrection = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
@@ -3162,6 +3162,7 @@ int runScene9() {
 
 	// load models
 	// -----------
+	stbi_set_flip_vertically_on_load(true);
 	Model backpack("Models/backpack/backpack.obj");
 
 	// configure g-buffer framebuffer
@@ -3176,8 +3177,6 @@ int runScene9() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
 	// normal color buffer
 	glGenTextures(1, &gNormal);
@@ -3277,6 +3276,9 @@ int runScene9() {
 
 	// shader configuration
 	// --------------------
+	shaderGeometryPass.use();
+	shaderGeometryPass.setInt("texture_diffuse1", 0);
+	shaderGeometryPass.setInt("texture_specular1", 1);
 	shaderLightingPass.use();
 	shaderLightingPass.setInt("gPosition", 0);
 	shaderLightingPass.setInt("gNormal", 1);
@@ -3291,6 +3293,9 @@ int runScene9() {
 	shaderSSAOBlur.use();
 	shaderSSAOBlur.setInt("ssaoInput", 0);
 
+	// Load textures
+	unsigned int container_diffuse = LoadTexture("Textures/worn_corrugated_iron_diff_2k.png", GL_REPEAT, false);
+	unsigned int container_specular = LoadTexture("worn_corrugated_iron_rough_2k.png", GL_REPEAT, false);
 
 	// render loop
 	// -----------
@@ -3327,6 +3332,10 @@ int runScene9() {
 		model = glm::scale(model, glm::vec3(7.5f, 7.5f, 7.5f));
 		shaderGeometryPass.setMat4("model", model);
 		shaderGeometryPass.setInt("invertedNormals", 1); // invert normals as we're inside the cube
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, container_diffuse);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, container_specular);
 		renderCube();
 		shaderGeometryPass.setInt("invertedNormals", 0);
 		// backpack model on the floor
@@ -3373,6 +3382,30 @@ int runScene9() {
 
 		// 4. lighting pass: traditional deferred Blinn-Phong lighting with added screen-space ambient occlusion
 		// -----------------------------------------------------------------------------------------------------
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		shaderLightingPass.use();
+
+		// send light relevant uniforms
+		glm::vec3 lightPosView = glm::vec3(camera.GetViewMatrix() * glm::vec4(lightPos, 1.0));
+		shaderLightingPass.setVec3("light.Position", lightPosView);
+		shaderLightingPass.setVec3("light.Color", lightColor);
+		shaderLightingPass.setVec3("viewPos", camera.Position);
+
+		// Update attenuation parameters
+		const float linear = 0.09f;
+		const float quadratic = 0.032f;
+		shaderLightingPass.setFloat("light.Linear", linear);
+		shaderLightingPass.setFloat("light.Quadratic", quadratic);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gPosition);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+		renderQuad();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------

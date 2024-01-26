@@ -17,6 +17,8 @@ struct Light {
 };
 uniform Light light;
 
+uniform vec3 viewPos;
+
 void main() {
     // retrieve data from gBuffer
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
@@ -27,7 +29,7 @@ void main() {
 
     // calculate lighting
     vec3 ambient = vec3(0.3 * Diffuse * AmbientOcclusion);
-    vec3 lighting  = ambient; 
+    vec3 lighting  = ambient;
     vec3 viewDir  = normalize(-FragPos);
 
     // diffuse
