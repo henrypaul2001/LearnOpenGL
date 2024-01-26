@@ -61,7 +61,7 @@ float exposure = 1.0f;
 
 int bloomPasses = 5;
 
-const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 720;
 const unsigned int MSAASamples = 4;
 const bool gammaCorrection = false;
