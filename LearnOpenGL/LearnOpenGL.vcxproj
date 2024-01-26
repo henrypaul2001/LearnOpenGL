@@ -212,6 +212,12 @@
     <None Include="lightCube.vert" />
     <None Include="model_loading.frag" />
     <None Include="model_loading.vert" />
+    <None Include="ssao.frag" />
+    <None Include="ssao.vert" />
+    <None Include="ssao_blur.frag" />
+    <None Include="ssao_geometry.frag" />
+    <None Include="ssao_geometry.vert" />
+    <None Include="ssao_lighting.frag" />
     <None Include="stencil_border.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
