@@ -66,6 +66,11 @@ const unsigned int MSAASamples = 4;
 const bool gammaCorrection = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
+float lerp(float a, float b, float f)
+{
+	return a + f * (b - a);
+}
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	camera.ProcessMouseScroll(yoffset);
 }
