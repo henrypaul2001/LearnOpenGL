@@ -3363,6 +3363,13 @@ int runScene9() {
 
 		// 3. blur SSAO texture to remove noise
 		// ------------------------------------
+		glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+		glClear(GL_COLOR_BUFFER_BIT);
+		shaderSSAOBlur.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+		renderQuad();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// 4. lighting pass: traditional deferred Blinn-Phong lighting with added screen-space ambient occlusion
 		// -----------------------------------------------------------------------------------------------------
