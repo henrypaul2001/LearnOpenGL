@@ -16,6 +16,28 @@ uniform vec3 lightColors[4];
 
 uniform vec3 camPos;
 
+const float PI = 3.14159265359;
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+	return 0.0;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+	return 0.0;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+	return 0.0;
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+	return vec3(0.0);
+}
+
 void main() {
 	vec3 N = normalize(Normal);
 	vec3 V = normalize(camPos - WorldPos);
@@ -27,6 +49,40 @@ void main() {
 	F0 = mix(F0, albedo, metallic);
 
 	// reflectance equation
+	vec3 Lo = vec3(0.0);
+	for (int i = 0; i < 4; ++i) {
+		// per-light radiance
+		vec3 L = normalize(lightPositions[i] - WorldPos);
+		vec3 H = normalize(V + L);
+		float distance = length(lightPositions[i] - WorldPos);
+		float attenuation = 1.0 / (distance * distance);
+		vec3 radiance = lightColors[i] * attenuation;
+
+		// Cook-Torrance BRDF
+		float NDF = DistributionGGX(N, H, roughness);
+		float G = GeometrySmith(N, V, L, roughness);
+		vec3 F = fresnelSchlick(clamp(dot(N, V), 0.0, 1.0), F0);
+
+		vec3 numerator = NDF * G * F;
+		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
+		vec3 specular = numerator / denominator;
+
+		// kS is equal to fresnel
+		vec3 kS = F;
+		
+		// for energy conservation, the diffuse and specular light can't be above 1.0 (unless the surface emits light)
+		// to preserve this relationship the diffuse component (kD) should equal 1.0 - kS
+		vec3 kD = vec3(1.0) - kS;
+
+		// multiply kD by inverse metalness such that only non-metals have diffuse lighting , or linear blend if partly metal
+		kD *= 1.0 - metallic;
+
+		// scale light by NdotL
+		float NdotL = max(dot(N, L), 0.0);
+
+		// add to outgoing radiance Lo
+		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+	}
 
 	// ambient lighting
 
