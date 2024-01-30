@@ -3585,9 +3585,6 @@ int runScene10() {
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-	shader.use();
-	shader.setMat4("projection", projection);
 
 	// render loop
 	// -----------
@@ -3610,8 +3607,10 @@ int runScene10() {
 
 		shader.use();
 		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		shader.setMat4("view", view);
 		shader.setVec3("camPos", camera.Position);
+		shader.setMat4("projection", projection);
 
 		// render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
 		glm::mat4 model = glm::mat4(1.0f);
