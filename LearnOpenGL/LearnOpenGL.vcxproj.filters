@@ -268,5 +268,11 @@
     <None Include="ssao.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="pbr_lighting.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="pbr_lighting.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>
