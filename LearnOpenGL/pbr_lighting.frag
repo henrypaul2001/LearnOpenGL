@@ -10,6 +10,20 @@ uniform float metallic;
 uniform float roughness;
 uniform float ao;
 
+// material textures
+uniform sampler2D albedoMap;
+uniform sampler2D normalMap;
+uniform sampler2D metallicMap;
+uniform sampler2D roughnessMap;
+uniform sampler2D aoMap;
+
+// material flags
+uniform bool useAlbedoMap;
+uniform bool useNormalMap;
+uniform bool useMetallicMap;
+uniform bool useRoughnessMap;
+uniform bool useAoMap;
+
 // lights
 uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
@@ -58,15 +72,38 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(WorldPos);
+    vec3 Q2  = dFdy(WorldPos);
+    vec2 st1 = dFdx(TexCoords);
+    vec2 st2 = dFdy(TexCoords);
+
+    vec3 N   = normalize(Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
+
 void main() {
-	vec3 N = normalize(Normal);
+	vec3 Albedo = useAlbedoMap ? pow(texture(albedoMap, TexCoords).rgb, vec3(2.2)) : albedo;
+	vec3 normal = useNormalMap ? getNormalFromMap() : Normal;
+	float Metallic = useMetallicMap ? texture(metallicMap, TexCoords).r : metallic;
+	float Roughness = useRoughnessMap ? texture(roughnessMap, TexCoords).r : roughness;
+	float AO = useAoMap ? texture(aoMap, TexCoords).r : ao;
+
+	vec3 N = normalize(normal);
 	vec3 V = normalize(camPos - WorldPos);
-	
+
 	// calculate reflectance at normal incidence
 	// if dia-electric, use F0 of 0.04
 	// if metal, use albedo colour as F0
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, albedo, metallic);
+	F0 = mix(F0, Albedo, Metallic);
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
@@ -79,8 +116,8 @@ void main() {
 		vec3 radiance = lightColors[i] * attenuation;
 
 		// Cook-Torrance BRDF
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
+		float NDF = DistributionGGX(N, H, Roughness);
+		float G = GeometrySmith(N, V, L, Roughness);
 		vec3 F = fresnelSchlick(clamp(dot(N, V), 0.0, 1.0), F0);
 
 		vec3 numerator = NDF * G * F;
@@ -95,17 +132,17 @@ void main() {
 		vec3 kD = vec3(1.0) - kS;
 
 		// multiply kD by inverse metalness such that only non-metals have diffuse lighting , or linear blend if partly metal
-		kD *= 1.0 - metallic;
+		kD *= 1.0 - Metallic;
 
 		// scale light by NdotL
 		float NdotL = max(dot(N, L), 0.0);
 
 		// add to outgoing radiance Lo
-		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+		Lo += (kD * Albedo / PI + specular) * radiance * NdotL;
 	}
 
 	// ambient lighting
-	vec3 ambient = vec3(0.03) * albedo * ao;
+	vec3 ambient = vec3(0.03) * Albedo * AO;
 
 	vec3 color = ambient + Lo;
 
