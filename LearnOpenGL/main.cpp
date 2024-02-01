@@ -61,8 +61,8 @@ float exposure = 1.0f;
 
 int bloomPasses = 5;
 
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 720;
+const unsigned int SCR_WIDTH = 1080;
+const unsigned int SCR_HEIGHT = 1080;
 const unsigned int MSAASamples = 4;
 const bool gammaCorrection = false;
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
@@ -170,7 +170,7 @@ unsigned int LoadTexture(const char* filepath, GLenum wrap, bool SRGB) {
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -3560,9 +3560,29 @@ int runScene10() {
 	// -------------------------
 	Shader shader("pbr_lighting.vert", "pbr_lighting.frag");
 
+	// initialize static shader uniforms before rendering
+	// --------------------------------------------------
 	shader.use();
 	shader.setVec3("albedo", 0.5f, 0.0f, 0.0f);
 	shader.setFloat("ao", 1.0f);
+	shader.setBool("useAlbedoMap", true);
+	shader.setBool("useNormalMap", true);
+	shader.setBool("useMetallicMap", true);
+	shader.setBool("useRoughnessMap", true);
+	shader.setBool("useAoMap", true);
+	shader.setInt("albedoMap", 0);
+	shader.setInt("normalMap", 1);
+	shader.setInt("metallicMap", 2);
+	shader.setInt("roughnessMap", 3);
+	shader.setInt("aoMap", 4);
+
+	// Load textures
+	// -------------
+	unsigned int albedo = LoadTexture("Textures/pbr/plastic/albedo.png", GL_REPEAT, false);
+	unsigned int normal = LoadTexture("Textures/pbr/plastic/normal.png", GL_REPEAT, false);
+	unsigned int metallic = LoadTexture("Textures/pbr/plastic/metallic.png", GL_REPEAT, false);
+	unsigned int roughness = LoadTexture("Textures/pbr/plastic/roughness.png", GL_REPEAT, false);
+	unsigned int ao = LoadTexture("Textures/pbr/plastic/ao.png", GL_REPEAT, false);
 
 	// lights
 	// ------
@@ -3582,9 +3602,6 @@ int runScene10() {
 	int nrRows = 7;
 	int nrColumns = 7;
 	float spacing = 2.5;
-
-	// initialize static shader uniforms before rendering
-	// --------------------------------------------------
 
 	// render loop
 	// -----------
@@ -3611,6 +3628,18 @@ int runScene10() {
 		shader.setMat4("view", view);
 		shader.setVec3("camPos", camera.Position);
 		shader.setMat4("projection", projection);
+		shader.setFloat("textureScale", 1.0);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, albedo);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, metallic);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, roughness);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, ao);
 
 		// render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
 		glm::mat4 model = glm::mat4(1.0f);
@@ -3643,6 +3672,16 @@ int runScene10() {
 			shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
 			renderSphere();
 		}
+
+		// render floor cube
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(15.0f, 1.0f, 15.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		shader.setMat4("model", model);
+		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+		shader.setFloat("textureScale", 1.0);
+		renderCube();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------

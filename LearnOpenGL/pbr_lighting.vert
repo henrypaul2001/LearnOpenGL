@@ -12,11 +12,13 @@ uniform mat4 view;
 uniform mat4 model;
 uniform mat3 normalMatrix;
 
+uniform float textureScale;
+
 void main()
 {
-    TexCoords = aTexCoords;
+    TexCoords = aTexCoords * textureScale;
     WorldPos = vec3(model * vec4(aPos, 1.0));
-    Normal = normalMatrix * aNormal;   
+    Normal = normalMatrix * aNormal;
 
     gl_Position =  projection * view * vec4(WorldPos, 1.0);
 }
