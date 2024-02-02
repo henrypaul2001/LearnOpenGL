@@ -3516,7 +3516,7 @@ int runScene9() {
 
 int runScene10() {
 	// glfw: initialize and configure
-   // ------------------------------
+    // ------------------------------
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -3695,6 +3695,187 @@ int runScene10() {
 	return 0;
 }
 
+int runScene11() {
+	// glfw: initialize and configure
+	// ------------------------------
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	glfwMakeContextCurrent(window);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// glad: load all OpenGL function pointers
+	// ---------------------------------------
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// build and compile shaders
+	// -------------------------
+	Shader shader("pbr_lighting.vert", "pbr_lighting.frag");
+
+	// initialize static shader uniforms before rendering
+	// --------------------------------------------------
+	shader.use();
+	shader.setVec3("albedo", 0.5f, 0.0f, 0.0f);
+	shader.setFloat("ao", 1.0f);
+	shader.setBool("useAlbedoMap", true);
+	shader.setBool("useNormalMap", true);
+	shader.setBool("useMetallicMap", true);
+	shader.setBool("useRoughnessMap", true);
+	shader.setBool("useAoMap", true);
+	shader.setInt("albedoMap", 0);
+	shader.setInt("normalMap", 1);
+	shader.setInt("metallicMap", 2);
+	shader.setInt("roughnessMap", 3);
+	shader.setInt("aoMap", 4);
+
+	// Load textures
+	// -------------
+	unsigned int albedo = LoadTexture("Textures/pbr/plastic/albedo.png", GL_REPEAT, false);
+	unsigned int normal = LoadTexture("Textures/pbr/plastic/normal.png", GL_REPEAT, false);
+	unsigned int metallic = LoadTexture("Textures/pbr/plastic/metallic.png", GL_REPEAT, false);
+	unsigned int roughness = LoadTexture("Textures/pbr/plastic/roughness.png", GL_REPEAT, false);
+	unsigned int ao = LoadTexture("Textures/pbr/plastic/ao.png", GL_REPEAT, false);
+
+	// lights
+	// ------
+	glm::vec3 lightPositions[] = {
+		glm::vec3(-10.0f,  10.0f, 10.0f),
+		glm::vec3(10.0f,  10.0f, 10.0f),
+		glm::vec3(-10.0f, -10.0f, 10.0f),
+		glm::vec3(10.0f, -10.0f, 10.0f),
+	};
+	glm::vec3 lightColors[] = {
+		glm::vec3(300.0f, 300.0f, 300.0f),
+		glm::vec3(300.0f, 300.0f, 300.0f),
+		glm::vec3(300.0f, 300.0f, 300.0f),
+		glm::vec3(300.0f, 300.0f, 300.0f)
+	};
+	// layout for rendering spheres
+	int nrRows = 7;
+	int nrColumns = 7;
+	float spacing = 2.5;
+
+	// render loop
+	// -----------
+	while (!glfwWindowShouldClose(window))
+	{
+		// per-frame time logic
+		// --------------------
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		// input
+		// -----
+		processInput(window);
+
+		// render
+		// ------
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader.use();
+		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		shader.setMat4("view", view);
+		shader.setVec3("camPos", camera.Position);
+		shader.setMat4("projection", projection);
+		shader.setFloat("textureScale", 1.0);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, albedo);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, metallic);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, roughness);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, ao);
+
+		// render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
+		glm::mat4 model = glm::mat4(1.0f);
+		for (int row = 0; row < nrRows; ++row) {
+			shader.setFloat("metallic", (float)row / (float)nrRows);
+			for (int col = 0; col < nrColumns; ++col) {
+				// clamp roughness to 0.05 - 1.0 because perfectly smooth surfaces look a bit off on direct lighting
+				shader.setFloat("roughness", glm::clamp((float)col / (float)nrColumns, 0.05f, 1.0f));
+
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
+				shader.setMat4("model", model);
+				shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+				renderSphere();
+			}
+		}
+
+		// render light sources as spheres
+		for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
+		{
+			glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
+			newPos = lightPositions[i];
+			shader.setVec3("lightPositions[" + std::to_string(i) + "]", newPos);
+			shader.setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, newPos);
+			model = glm::scale(model, glm::vec3(0.5f));
+			shader.setMat4("model", model);
+			shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+			renderSphere();
+		}
+
+		// render floor cube
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(15.0f, 1.0f, 15.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		shader.setMat4("model", model);
+		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+		shader.setFloat("textureScale", 1.0);
+		renderCube();
+
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	// glfw: terminate, clearing all previously allocated GLFW resources.
+	// ------------------------------------------------------------------
+	glfwTerminate();
+	return 0;
+}
+
 int main() {
-	return runScene10();
+	return runScene11();
 }
