@@ -3746,11 +3746,11 @@ int runScene11() {
 	shader.use();
 	shader.setVec3("albedo", 0.5f, 0.0f, 0.0f);
 	shader.setFloat("ao", 1.0f);
-	shader.setBool("useAlbedoMap", true);
-	shader.setBool("useNormalMap", true);
-	shader.setBool("useMetallicMap", true);
-	shader.setBool("useRoughnessMap", true);
-	shader.setBool("useAoMap", true);
+	shader.setBool("useAlbedoMap", false);
+	shader.setBool("useNormalMap", false);
+	shader.setBool("useMetallicMap", false);
+	shader.setBool("useRoughnessMap", false);
+	shader.setBool("useAoMap", false);
 	shader.setInt("albedoMap", 0);
 	shader.setInt("normalMap", 1);
 	shader.setInt("metallicMap", 2);
@@ -3853,16 +3853,6 @@ int runScene11() {
 			shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
 			renderSphere();
 		}
-
-		// render floor cube
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(15.0f, 1.0f, 15.0f));
-		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		shader.setMat4("model", model);
-		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
-		shader.setFloat("textureScale", 1.0);
-		renderCube();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
