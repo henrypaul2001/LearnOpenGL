@@ -61,7 +61,7 @@ float exposure = 1.0f;
 
 int bloomPasses = 5;
 
-const unsigned int SCR_WIDTH = 1080;
+const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 const unsigned int MSAASamples = 4;
 const bool gammaCorrection = false;
@@ -3781,6 +3781,9 @@ int runScene11() {
 	shader.setInt("roughnessMap", 3);
 	shader.setInt("aoMap", 4);
 
+	convertToCubemapShader.use();
+	convertToCubemapShader.setInt("equirectangularMap", 0);
+
 	// Load textures
 	// -------------
 	unsigned int albedo = LoadTexture("Textures/pbr/plastic/albedo.png", GL_REPEAT, false);
@@ -3788,6 +3791,8 @@ int runScene11() {
 	unsigned int metallic = LoadTexture("Textures/pbr/plastic/metallic.png", GL_REPEAT, false);
 	unsigned int roughness = LoadTexture("Textures/pbr/plastic/roughness.png", GL_REPEAT, false);
 	unsigned int ao = LoadTexture("Textures/pbr/plastic/ao.png", GL_REPEAT, false);
+
+	unsigned int environmentMap = LoadHDREnvironmentMap("Textures/hdr/newport_loft.hdr", true);
 
 	// lights
 	// ------
@@ -3877,6 +3882,14 @@ int runScene11() {
 			shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
 			renderSphere();
 		}
+
+		// test render equirectangular map as cube
+		convertToCubemapShader.use();
+		convertToCubemapShader.setMat4("projection", projection);
+		convertToCubemapShader.setMat4("view", view);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, environmentMap);
+		renderCube();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
