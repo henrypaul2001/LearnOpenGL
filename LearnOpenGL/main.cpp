@@ -3817,11 +3817,11 @@ int runScene11() {
 
 	// Load textures
 	// -------------
-	unsigned int albedo = LoadTexture("Textures/pbr/rusted_iron/albedo.png", GL_REPEAT, false);
-	unsigned int normal = LoadTexture("Textures/pbr/rusted_iron/normal.png", GL_REPEAT, false);
-	unsigned int metallic = LoadTexture("Textures/pbr/rusted_iron/metallic.png", GL_REPEAT, false);
-	unsigned int roughness = LoadTexture("Textures/pbr/rusted_iron/roughness.png", GL_REPEAT, false);
-	unsigned int ao = LoadTexture("Textures/pbr/rusted_iron/ao.png", GL_REPEAT, false);
+	unsigned int albedo = LoadTexture("Textures/pbr/scifi/albedo.png", GL_REPEAT, false);
+	unsigned int normal = LoadTexture("Textures/pbr/scifi/normal.png", GL_REPEAT, false);
+	unsigned int metallic = LoadTexture("Textures/pbr/scifi/metallic.png", GL_REPEAT, false);
+	unsigned int roughness = LoadTexture("Textures/pbr/scifi/roughness.png", GL_REPEAT, false);
+	unsigned int ao = LoadTexture("Textures/pbr/scifi/ao.png", GL_REPEAT, false);
 
 	unsigned int environmentMap = LoadHDREnvironmentMap("Textures/hdr/newport_loft.hdr", true);
 
