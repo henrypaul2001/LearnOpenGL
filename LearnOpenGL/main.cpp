@@ -3808,6 +3808,9 @@ int runScene11() {
 	shader.setInt("roughnessMap", 3);
 	shader.setInt("aoMap", 4);
 
+	skyboxShader.use();
+	skyboxShader.setInt("environmentMap", 0);
+
 	// Load textures
 	// -------------
 	unsigned int albedo = LoadTexture("Textures/pbr/plastic/albedo.png", GL_REPEAT, false);
@@ -3863,6 +3866,7 @@ int runScene11() {
 		renderCube();
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
 	// render loop
 	// -----------
@@ -3934,10 +3938,10 @@ int runScene11() {
 			renderSphere();
 		}
 
-		// test render equirectangular map as cube
-		convertToCubemapShader.use();
-		convertToCubemapShader.setMat4("projection", projection);
-		convertToCubemapShader.setMat4("view", view);
+		// render skybox
+		skyboxShader.use();
+		skyboxShader.setMat4("projection", projection);
+		skyboxShader.setMat4("view", view);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, environmentMap);
 		renderCube();
