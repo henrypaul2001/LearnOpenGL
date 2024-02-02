@@ -185,6 +185,7 @@
     <None Include="hdr_shader.vert" />
     <None Include="instancing.frag" />
     <None Include="instancing.vert" />
+    <None Include="irradiance_convolution.frag" />
     <None Include="lightBox.frag" />
     <None Include="lighting_hdr.frag" />
     <None Include="lighting_hdr.vert" />

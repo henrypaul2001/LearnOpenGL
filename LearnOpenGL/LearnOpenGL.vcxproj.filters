@@ -286,5 +286,8 @@
     <None Include="envMapSkybox.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="irradiance_convolution.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

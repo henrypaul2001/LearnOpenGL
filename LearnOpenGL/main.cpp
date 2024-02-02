@@ -3791,6 +3791,7 @@ int runScene11() {
 	Shader shader("pbr_lighting.vert", "pbr_lighting.frag");
 	Shader convertToCubemapShader("convert_to_cubemap.vert", "convert_to_cubemap.frag");
 	Shader skyboxShader("envMapSkybox.vert", "envMapSkybox.frag");
+	Shader irradianceShader("convert_to_cubemap.vert", "irradiance_convolution.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
