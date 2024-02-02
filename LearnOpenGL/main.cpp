@@ -3759,6 +3759,7 @@ int runScene11() {
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
 	// Framebuffers
 	// ------------
@@ -3789,6 +3790,7 @@ int runScene11() {
 	// -------------------------
 	Shader shader("pbr_lighting.vert", "pbr_lighting.frag");
 	Shader convertToCubemapShader("convert_to_cubemap.vert", "convert_to_cubemap.frag");
+	Shader skyboxShader("envMapSkybox.vert", "envMapSkybox.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------

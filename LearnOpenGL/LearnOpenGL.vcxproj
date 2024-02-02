@@ -171,6 +171,8 @@
     <None Include="depthDebug.vert" />
     <None Include="depthMap.frag" />
     <None Include="depthMap.vert" />
+    <None Include="envMapSkybox.frag" />
+    <None Include="envMapSkybox.vert" />
     <None Include="explode.frag" />
     <None Include="explode.geom" />
     <None Include="explode.vert" />
