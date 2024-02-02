@@ -24,6 +24,10 @@ uniform bool useMetallicMap;
 uniform bool useRoughnessMap;
 uniform bool useAoMap;
 
+// IBL
+uniform samplerCube irradianceMap;
+uniform bool useIrradianceMap;
+
 // lights
 uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
@@ -143,6 +147,14 @@ void main() {
 
 	// ambient lighting
 	vec3 ambient = vec3(0.01) * Albedo * AO;
+	if (useIrradianceMap) {
+		vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+		vec3 kD = 1.0 - kS;
+		kD *= 1.0 - Metallic;
+		vec3 irradiance = texture(irradianceMap, N).rgb;
+		vec3 diffuse = irradiance * Albedo;
+		ambient = (kD * diffuse) * AO;
+	}
 
 	vec3 color = ambient + Lo;
 

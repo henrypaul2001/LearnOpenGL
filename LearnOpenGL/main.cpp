@@ -3593,6 +3593,7 @@ int runScene10() {
 	shader.setBool("useMetallicMap", true);
 	shader.setBool("useRoughnessMap", true);
 	shader.setBool("useAoMap", true);
+	shader.setBool("useIrradianceMap", false);
 	shader.setInt("albedoMap", 0);
 	shader.setInt("normalMap", 1);
 	shader.setInt("metallicMap", 2);
@@ -3798,16 +3799,18 @@ int runScene11() {
 	shader.use();
 	shader.setVec3("albedo", 0.5f, 0.0f, 0.0f);
 	shader.setFloat("ao", 1.0f);
-	shader.setBool("useAlbedoMap", false);
-	shader.setBool("useNormalMap", false);
-	shader.setBool("useMetallicMap", false);
-	shader.setBool("useRoughnessMap", false);
-	shader.setBool("useAoMap", false);
+	shader.setBool("useAlbedoMap", true);
+	shader.setBool("useNormalMap", true);
+	shader.setBool("useMetallicMap", true);
+	shader.setBool("useRoughnessMap", true);
+	shader.setBool("useAoMap", true);
 	shader.setInt("albedoMap", 0);
 	shader.setInt("normalMap", 1);
 	shader.setInt("metallicMap", 2);
 	shader.setInt("roughnessMap", 3);
 	shader.setInt("aoMap", 4);
+	shader.setInt("irradianceMap", 5);
+	shader.setBool("useIrradianceMap", true);
 
 	skyboxShader.use();
 	skyboxShader.setInt("environmentMap", 0);
@@ -3946,6 +3949,8 @@ int runScene11() {
 		glBindTexture(GL_TEXTURE_2D, roughness);
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, ao);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
 
 		// render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
 		glm::mat4 model = glm::mat4(1.0f);
