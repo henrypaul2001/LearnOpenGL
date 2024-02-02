@@ -160,6 +160,8 @@
     <None Include="bloom_final.vert" />
     <None Include="blur.frag" />
     <None Include="blur.vert" />
+    <None Include="convert_to_cubemap.frag" />
+    <None Include="convert_to_cubemap.vert" />
     <None Include="deferred_light_box.frag" />
     <None Include="deferred_light_box.vert" />
     <None Include="deferred_shading.frag" />

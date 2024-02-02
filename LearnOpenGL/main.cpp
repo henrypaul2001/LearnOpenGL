@@ -3763,6 +3763,7 @@ int runScene11() {
 	// build and compile shaders
 	// -------------------------
 	Shader shader("pbr_lighting.vert", "pbr_lighting.frag");
+	Shader convertToCubemapShader("convert_to_cubemap.vert", "convert_to_cubemap.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------

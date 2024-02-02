@@ -274,5 +274,11 @@
     <None Include="pbr_lighting.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="convert_to_cubemap.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="convert_to_cubemap.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>
