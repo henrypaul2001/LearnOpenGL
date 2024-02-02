@@ -143,6 +143,31 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
+unsigned int LoadHDREnvironmentMap(const char* filepath, bool flipVertically) {
+	stbi_set_flip_vertically_on_load(flipVertically);
+
+	unsigned int hdrTexture;
+	glGenTextures(1, &hdrTexture);
+	int width, height, nrComponents;
+	float* data = stbi_loadf(filepath, &width, &height, &nrComponents, 0);
+	if (data) {
+		glBindTexture(GL_TEXTURE_2D, hdrTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else {
+		std::cout << "HDR texture failed to load at path: " << filepath << std::endl;
+	}
+	stbi_image_free(data);
+	stbi_set_flip_vertically_on_load(!flipVertically);
+
+	return hdrTexture;
+}
+
 unsigned int LoadTexture(const char* filepath, GLenum wrap, bool SRGB) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -174,14 +199,12 @@ unsigned int LoadTexture(const char* filepath, GLenum wrap, bool SRGB) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
 	}
 	else
 	{
 		std::cout << "Texture failed to load at path: " << filepath << std::endl;
-		stbi_image_free(data);
 	}
+	stbi_image_free(data);
 
 	return textureID;
 }
