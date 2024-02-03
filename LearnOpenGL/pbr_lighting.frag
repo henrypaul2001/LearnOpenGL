@@ -25,8 +25,10 @@ uniform bool useRoughnessMap;
 uniform bool useAoMap;
 
 // IBL
+uniform bool useIBL;
 uniform samplerCube irradianceMap;
-uniform bool useIrradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 // lights
 uniform vec3 lightPositions[4];
@@ -147,7 +149,7 @@ void main() {
 
 	// ambient lighting
 	vec3 ambient = vec3(0.01) * Albedo * AO;
-	if (useIrradianceMap) {
+	if (useIBL) {
 		vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
 		vec3 kD = 1.0 - kS;
 		kD *= 1.0 - Metallic;

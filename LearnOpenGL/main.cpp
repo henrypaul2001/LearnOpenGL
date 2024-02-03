@@ -3813,7 +3813,9 @@ int runScene11() {
 	shader.setInt("roughnessMap", 3);
 	shader.setInt("aoMap", 4);
 	shader.setInt("irradianceMap", 5);
-	shader.setBool("useIrradianceMap", true);
+	shader.setInt("prefilterMap", 6);
+	shader.setInt("brdfLUT", 7);
+	shader.setBool("useIBL", true);
 
 	skyboxShader.use();
 	skyboxShader.setInt("environmentMap", 0);
