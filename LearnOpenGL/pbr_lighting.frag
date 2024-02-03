@@ -78,6 +78,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}   
+
 vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0 - 1.0;
@@ -104,6 +109,7 @@ void main() {
 
 	vec3 N = normalize(normal);
 	vec3 V = normalize(camPos - WorldPos);
+	vec3 R = reflect(-V, N);
 
 	// calculate reflectance at normal incidence
 	// if dia-electric, use F0 of 0.04
@@ -150,12 +156,21 @@ void main() {
 	// ambient lighting
 	vec3 ambient = vec3(0.01) * Albedo * AO;
 	if (useIBL) {
-		vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+		vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, Roughness);
+
+		vec3 kS = F;
 		vec3 kD = 1.0 - kS;
 		kD *= 1.0 - Metallic;
+
 		vec3 irradiance = texture(irradianceMap, N).rgb;
 		vec3 diffuse = irradiance * Albedo;
-		ambient = (kD * diffuse) * AO;
+
+		const float MAX_REFLECTION_LOD = 4.0;
+		vec3 prefilterdColor = textureLod(prefilterMap, R, Roughness * MAX_REFLECTION_LOD).rgb;
+		vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), Roughness)).rg;
+		vec3 specular = prefilterdColor * (F * brdf.x + brdf.y);
+
+		ambient = (kD * diffuse + specular) * AO;
 	}
 
 	vec3 color = ambient + Lo;
