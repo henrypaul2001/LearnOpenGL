@@ -3761,6 +3761,7 @@ int runScene11() {
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	// Framebuffers
 	// ------------
