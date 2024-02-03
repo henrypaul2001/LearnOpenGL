@@ -3939,8 +3939,11 @@ int runScene11() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
 
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	unsigned int maxMipLevels = 5;
+	unsigned int maxMipLevels = 2;
 	for (unsigned int mip = 0; mip < maxMipLevels; ++mip) {
 		// resize framebuffer
 		unsigned int mipWidth = 128 * std::pow(0.5, mip);
@@ -4039,7 +4042,7 @@ int runScene11() {
 		skyboxShader.setMat4("projection", projection);
 		skyboxShader.setMat4("view", view);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
 		renderCube();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
