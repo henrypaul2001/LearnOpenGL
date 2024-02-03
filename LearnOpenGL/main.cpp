@@ -3802,11 +3802,11 @@ int runScene11() {
 	shader.use();
 	shader.setVec3("albedo", 0.5f, 0.0f, 0.0f);
 	shader.setFloat("ao", 1.0f);
-	shader.setBool("useAlbedoMap", false);
-	shader.setBool("useNormalMap", false);
-	shader.setBool("useMetallicMap", false);
-	shader.setBool("useRoughnessMap", false);
-	shader.setBool("useAoMap", false);
+	shader.setBool("useAlbedoMap", true);
+	shader.setBool("useNormalMap", true);
+	shader.setBool("useMetallicMap", true);
+	shader.setBool("useRoughnessMap", true);
+	shader.setBool("useAoMap", true);
 	shader.setInt("albedoMap", 0);
 	shader.setInt("normalMap", 1);
 	shader.setInt("metallicMap", 2);
@@ -3925,7 +3925,7 @@ int runScene11() {
 	glGenTextures(1, &prefilterMap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
 	for (unsigned int i = 0; i < 6; ++i) {
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128 * 2, 128 * 2, 0, GL_RGB, GL_FLOAT, nullptr);
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -3949,8 +3949,8 @@ int runScene11() {
 	unsigned int maxMipLevels = 5;
 	for (unsigned int mip = 0; mip < maxMipLevels; ++mip) {
 		// resize framebuffer
-		unsigned int mipWidth = 128 * std::pow(0.5, mip);
-		unsigned int mipHeight = 128 * std::pow(0.5, mip);
+		unsigned int mipWidth = (128 * 2) * std::pow(0.5, mip);
+		unsigned int mipHeight = (128 * 2) * std::pow(0.5, mip);
 		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
 		glViewport(0, 0, mipWidth, mipHeight);
