@@ -3795,6 +3795,7 @@ int runScene11() {
 	Shader skyboxShader("envMapSkybox.vert", "envMapSkybox.frag");
 	Shader irradianceShader("convert_to_cubemap.vert", "irradiance_convolution.frag");
 	Shader prefilterShader("convert_to_cubemap.vert", "prefilter.frag");
+	Shader brdfShader("brdf.vert", "brdf.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
@@ -3943,7 +3944,7 @@ int runScene11() {
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	unsigned int maxMipLevels = 2;
+	unsigned int maxMipLevels = 5;
 	for (unsigned int mip = 0; mip < maxMipLevels; ++mip) {
 		// resize framebuffer
 		unsigned int mipWidth = 128 * std::pow(0.5, mip);
@@ -3964,6 +3965,9 @@ int runScene11() {
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+
+
+
 
 	// render loop
 	// -----------
@@ -4042,7 +4046,7 @@ int runScene11() {
 		skyboxShader.setMat4("projection", projection);
 		skyboxShader.setMat4("view", view);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMap);
 		renderCube();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
