@@ -298,5 +298,11 @@
     <None Include="brdf.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="debugFramebufferView.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
+    <None Include="debugFramebufferView.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

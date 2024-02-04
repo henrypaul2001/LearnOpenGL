@@ -188,14 +188,14 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
 
 	switch (severity)
 	{
-		case GL_DEBUG_SEVERITY_HIGH:
-			std::cout << "Severity: high"; break;
-		case GL_DEBUG_SEVERITY_MEDIUM:
-			std::cout << "Severity: medium"; break;
-		case GL_DEBUG_SEVERITY_LOW:
-			std::cout << "Severity: low"; break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION:
-			std::cout << "Severity: notification"; break;
+	case GL_DEBUG_SEVERITY_HIGH:
+		std::cout << "Severity: high"; break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		std::cout << "Severity: medium"; break;
+	case GL_DEBUG_SEVERITY_LOW:
+		std::cout << "Severity: low"; break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		std::cout << "Severity: notification"; break;
 	} std::cout << std::endl;
 }
 
@@ -676,6 +676,18 @@ void renderSphere()
 
 	glBindVertexArray(sphereVAO);
 	glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+}
+
+void DisplayFramebufferTexture(unsigned int textureID, Shader& fboDebug) {
+	fboDebug.use();
+	fboDebug.setInt("fboAttachment", 0);
+	glm::vec2 translate = glm::vec2(0.72f, 0.7f);
+	glm::vec2 scale = glm::vec2(0.25f, 0.25f);
+	fboDebug.setVec2("translate", translate);
+	fboDebug.setVec2("scale", scale);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	renderQuad();
 }
 
 int runScene1() {
@@ -3821,6 +3833,7 @@ int runScene11() {
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(glDebugOutput, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		//glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_MEDIUM, -1, "error message here"); // example of custom error message
 	}
 
 	// configure global opengl state
@@ -3862,6 +3875,7 @@ int runScene11() {
 	Shader irradianceShader("convert_to_cubemap.vert", "irradiance_convolution.frag");
 	Shader prefilterShader("convert_to_cubemap.vert", "prefilter.frag");
 	Shader brdfShader("brdf.vert", "brdf.frag");
+	Shader fboDebug("debugFramebufferView.vert", "debugFramebufferView.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
@@ -4153,6 +4167,9 @@ int runScene11() {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, environmentMap);
 		renderCube();
+
+		// debug fbo
+		DisplayFramebufferTexture(brdfLUTTexture, fboDebug);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
