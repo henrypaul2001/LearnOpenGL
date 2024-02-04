@@ -3822,11 +3822,11 @@ int runScene11() {
 
 	// Load textures
 	// -------------
-	unsigned int albedo = LoadTexture("Textures/pbr/scifi/albedo.png", GL_REPEAT, false);
-	unsigned int normal = LoadTexture("Textures/pbr/scifi/normal.png", GL_REPEAT, false);
-	unsigned int metallic = LoadTexture("Textures/pbr/scifi/metallic.png", GL_REPEAT, false);
-	unsigned int roughness = LoadTexture("Textures/pbr/scifi/roughness.png", GL_REPEAT, false);
-	unsigned int ao = LoadTexture("Textures/pbr/scifi/ao.png", GL_REPEAT, false);
+	unsigned int albedo = LoadTexture("Textures/pbr/rusted_iron/albedo.png", GL_REPEAT, true);
+	unsigned int normal = LoadTexture("Textures/pbr/rusted_iron/normal.png", GL_REPEAT, false);
+	unsigned int metallic = LoadTexture("Textures/pbr/rusted_iron/metallic.png", GL_REPEAT, false);
+	unsigned int roughness = LoadTexture("Textures/pbr/rusted_iron/roughness.png", GL_REPEAT, false);
+	unsigned int ao = LoadTexture("Textures/pbr/rusted_iron/ao.png", GL_REPEAT, false);
 
 	unsigned int environmentMap = LoadHDREnvironmentMap("Textures/hdr/newport_loft.hdr", true);
 
@@ -4071,6 +4071,14 @@ int runScene11() {
 			shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
 			renderSphere();
 		}
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 0.01f));
+		shader.setMat4("model", model);
+		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+		renderCube();
 
 		// render skybox
 		skyboxShader.use();
