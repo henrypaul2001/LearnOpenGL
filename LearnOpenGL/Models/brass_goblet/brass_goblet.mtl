@@ -13,7 +13,7 @@ illum 2
 map_Bump brass_goblet_01_nor_gl_4k.png
 map_Kd brass_goblet_01_diff_4k.png
 map_Ks brass_goblet_01_rough_4k.png
-refl brass_goblet_01_metal_4k.png
+map_ns brass_goblet_01_metal_4k.png
 
 newmtl brass_goblets_02
 Ns 250.000000
@@ -27,7 +27,7 @@ illum 2
 map_Bump brass_goblet_02_nor_gl_4k.png
 map_Kd brass_goblet_02_diff_4k.png
 map_Ks brass_goblet_02_rough_4k.png
-refl brass_goblet_02_metal_4k.png
+map_ns brass_goblet_02_metal_4k.png
 
 newmtl brass_goblets_03
 Ns 250.000000

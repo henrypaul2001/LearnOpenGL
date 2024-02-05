@@ -4079,6 +4079,7 @@ int runScene11() {
 	// Model loading
 	// -------------
 	Model brass_goblets = Model("Models/brass_goblet/brass_goblet.obj");
+	Model cart = Model("Models/cart/cart.obj");
 
 	// render loop
 	// -----------
@@ -4126,6 +4127,11 @@ int runScene11() {
 
 		// render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
 		glm::mat4 model = glm::mat4(1.0f);
+		shader.setBool("useAlbedoMap", true);
+		shader.setBool("useNormalMap", true);
+		shader.setBool("useMetallicMap", true);
+		shader.setBool("useRoughnessMap", true);
+		shader.setBool("useAoMap", true);
 		for (int row = 0; row < nrRows; ++row) {
 			shader.setFloat("metallic", (float)row / (float)nrRows);
 			for (int col = 0; col < nrColumns; ++col) {
@@ -4164,14 +4170,20 @@ int runScene11() {
 		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
 		renderCube();
 
-
 		// Render model
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-5.0f, 5.0f, 2.5f));
-		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+		model = glm::translate(model, glm::vec3(-5.0f, 5.0f, 3.5f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		shader.setMat4("model", model);
 		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
 		brass_goblets.Draw(shader);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 5.0f));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		shader.setMat4("model", model);
+		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+		cart.Draw(shader);
 
 		// render skybox
 		skyboxShader.use();

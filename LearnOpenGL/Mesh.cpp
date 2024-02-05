@@ -59,27 +59,22 @@ void Mesh::Draw(Shader& shader)
 			if (name == "albedoMap") {
 				number = std::to_string(albedoNr++);
 				shader.setBool("useAlbedoMap", true);
-				std::cout << "albedo found" << std::endl;
 			}
 			else if (name == "normalMap") {
 				number = std::to_string(normalNr++);
 				shader.setBool("useNormalMap", true);
-				std::cout << "normal found" << std::endl;
 			}
 			else if (name == "metallicMap") {
 				number = std::to_string(metallicNr++);
 				shader.setBool("useMetallicMap", true);
-				std::cout << "metallic found" << std::endl;
 			}
 			else if (name == "roughnessMap") {
 				number = std::to_string(roughnessNr++);
 				shader.setBool("useRoughnessMap", true);
-				std::cout << "roughness found" << std::endl;
 			}
 			else if (name == "aoMap") {
 				number = std::to_string(aoNr++);
 				shader.setBool("useAoMap", true);
-				std::cout << "ao found" << std::endl;
 			}
 
 			shader.setInt(name + number, i);
