@@ -11,31 +11,82 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 void Mesh::Draw(Shader& shader)
 {
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
-	unsigned int normalNr = 1;
-	unsigned int heightNr = 1;
-	for (unsigned int i = 0; i < textures.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		std::string number;
-		std::string name = textures[i].type;
-		if (name == "texture_diffuse") {
-			number = std::to_string(diffuseNr++);
-		}
-		else if (name == "texture_specular") {
-			number = std::to_string(specularNr++);
-		}
-		else if (name == "texture_normal") {
-			number = std::to_string(normalNr++);
-		}
-		else if (name == "texture_height") {
-			number = std::to_string(heightNr++);
-		}
+	bool PBR = true;
 
-		shader.setFloat(("material." + name + number).c_str(), i);
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+	if (!PBR) {
+		unsigned int diffuseNr = 1;
+		unsigned int specularNr = 1;
+		unsigned int normalNr = 1;
+		unsigned int heightNr = 1;
+		for (unsigned int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			std::string number;
+			std::string name = textures[i].type;
+			if (name == "texture_diffuse") {
+				number = std::to_string(diffuseNr++);
+			}
+			else if (name == "texture_specular") {
+				number = std::to_string(specularNr++);
+			}
+			else if (name == "texture_normal") {
+				number = std::to_string(normalNr++);
+			}
+			else if (name == "texture_height") {
+				number = std::to_string(heightNr++);
+			}
+
+			shader.setFloat(("material." + name + number).c_str(), i);
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+		glActiveTexture(GL_TEXTURE0);
 	}
-	glActiveTexture(GL_TEXTURE0);
+	else {
+		shader.setBool("useAlbedoMap", false);
+		shader.setBool("useNormalMap", false);
+		shader.setBool("useMetallicMap", false);
+		shader.setBool("useRoughnessMap", false);
+		shader.setBool("useAoMap", false);
+
+		unsigned int albedoNr = 1;
+		unsigned int normalNr = 1;
+		unsigned int metallicNr = 1;
+		unsigned int roughnessNr = 1;
+		unsigned int aoNr = 1;
+		for (unsigned int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			std::string number;
+			std::string name = textures[i].type;
+			if (name == "albedoMap") {
+				number = std::to_string(albedoNr++);
+				shader.setBool("useAlbedoMap", true);
+				std::cout << "albedo found" << std::endl;
+			}
+			else if (name == "normalMap") {
+				number = std::to_string(normalNr++);
+				shader.setBool("useNormalMap", true);
+				std::cout << "normal found" << std::endl;
+			}
+			else if (name == "metallicMap") {
+				number = std::to_string(metallicNr++);
+				shader.setBool("useMetallicMap", true);
+				std::cout << "metallic found" << std::endl;
+			}
+			else if (name == "roughnessMap") {
+				number = std::to_string(roughnessNr++);
+				shader.setBool("useRoughnessMap", true);
+				std::cout << "roughness found" << std::endl;
+			}
+			else if (name == "aoMap") {
+				number = std::to_string(aoNr++);
+				shader.setBool("useAoMap", true);
+				std::cout << "ao found" << std::endl;
+			}
+
+			shader.setInt(name + number, i);
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+		glActiveTexture(GL_TEXTURE0);
+	}
 
 	// draw
 	glBindVertexArray(VAO);

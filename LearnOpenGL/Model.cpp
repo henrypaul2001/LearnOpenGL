@@ -83,21 +83,41 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 	}
 	
+	bool PBR = true;
 	// retrieve materials
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		if (!PBR) {
+			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular"); // roughness map
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-		std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+			std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height"); // AO
+			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+		}
+		else {
+			// PBR
+			std::vector<Texture> albedoMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "albedoMap");
+			textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
+
+			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "normalMap");
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
+			std::vector<Texture> metallicMaps = loadMaterialTextures(material, aiTextureType_SHININESS, "metallicMap");
+			textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
+
+			std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "roughnessMap");
+			textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
+
+			std::vector<Texture> aoMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "aoMap");
+			textures.insert(textures.end(), aoMaps.begin(), aoMaps.end());
+		}
 	}
 
 	return Mesh(vertices, indices, textures);

@@ -11,11 +11,11 @@ uniform float roughness;
 uniform float ao;
 
 // material textures
-uniform sampler2D albedoMap;
-uniform sampler2D normalMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
-uniform sampler2D aoMap;
+uniform sampler2D albedoMap1;
+uniform sampler2D normalMap1;
+uniform sampler2D metallicMap1;
+uniform sampler2D roughnessMap1;
+uniform sampler2D aoMap1;
 
 // material flags
 uniform bool useAlbedoMap;
@@ -85,7 +85,7 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 
 vec3 getNormalFromMap()
 {
-    vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0 - 1.0;
+    vec3 tangentNormal = texture(normalMap1, TexCoords).xyz * 2.0 - 1.0;
 
     vec3 Q1  = dFdx(WorldPos);
     vec3 Q2  = dFdy(WorldPos);
@@ -101,11 +101,11 @@ vec3 getNormalFromMap()
 }
 
 void main() {
-	vec3 Albedo = useAlbedoMap ? pow(texture(albedoMap, TexCoords).rgb, vec3(2.2)) : albedo;
+	vec3 Albedo = useAlbedoMap ? pow(texture(albedoMap1, TexCoords).rgb, vec3(2.2)) : albedo;
 	vec3 normal = useNormalMap ? getNormalFromMap() : Normal;
-	float Metallic = useMetallicMap ? texture(metallicMap, TexCoords).r : metallic;
-	float Roughness = useRoughnessMap ? texture(roughnessMap, TexCoords).r : roughness;
-	float AO = useAoMap ? texture(aoMap, TexCoords).r : ao;
+	float Metallic = useMetallicMap ? texture(metallicMap1, TexCoords).r : metallic;
+	float Roughness = useRoughnessMap ? texture(roughnessMap1, TexCoords).r : roughness;
+	float AO = useAoMap ? texture(aoMap1, TexCoords).r : ao;
 
 	vec3 N = normalize(normal);
 	vec3 V = normalize(camPos - WorldPos);

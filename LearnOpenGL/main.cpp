@@ -4076,6 +4076,10 @@ int runScene11() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
+	// Model loading
+	// -------------
+	Model brass_goblets = Model("Models/brass_goblet/brass_goblet.obj");
+
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -4159,6 +4163,15 @@ int runScene11() {
 		shader.setMat4("model", model);
 		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
 		renderCube();
+
+
+		// Render model
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(-5.0f, 5.0f, 2.5f));
+		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+		shader.setMat4("model", model);
+		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+		brass_goblets.Draw(shader);
 
 		// render skybox
 		skyboxShader.use();
