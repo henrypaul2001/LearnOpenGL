@@ -3841,6 +3841,7 @@ int runScene11() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glEnable(GL_CULL_FACE);
 
 	// Framebuffers
 	// ------------
@@ -3946,6 +3947,7 @@ int runScene11() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, environmentMap);
 
+	glDisable(GL_CULL_FACE);
 	glViewport(0, 0, 512, 512);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	for (unsigned int i = 0; i < 6; ++i) {
@@ -4075,6 +4077,7 @@ int runScene11() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	glEnable(GL_CULL_FACE);
 
 	// Model loading
 	// -------------
@@ -4186,12 +4189,14 @@ int runScene11() {
 		cart.Draw(shader);
 
 		// render skybox
+		glDisable(GL_CULL_FACE);
 		skyboxShader.use();
 		skyboxShader.setMat4("projection", projection);
 		skyboxShader.setMat4("view", view);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, environmentMap);
 		renderCube();
+		glEnable(GL_CULL_FACE);
 
 		// debug fbo
 		DisplayFramebufferTexture(brdfLUTTexture, fboDebug);
