@@ -236,6 +236,8 @@
     <None Include="ssao_geometry.vert" />
     <None Include="ssao_lighting.frag" />
     <None Include="stencil_border.frag" />
+    <None Include="text.frag" />
+    <None Include="text.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
