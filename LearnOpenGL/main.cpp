@@ -12,6 +12,9 @@
 #include <map>
 #include <random>
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
+
 static float deltaTime = 0.0f;
 
 // Camera
