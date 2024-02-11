@@ -690,7 +690,7 @@ void renderSphere()
 	glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
 }
 
-void DisplayFramebufferTexture(unsigned int textureID, Shader& fboDebug) {
+void DisplayFramebufferTexture(unsigned int textureID, Shader& fboDebug, GLenum textureType) {
 	fboDebug.use();
 	fboDebug.setInt("fboAttachment", 0);
 	glm::vec2 translate = glm::vec2(0.72f, 0.7f);
@@ -698,7 +698,7 @@ void DisplayFramebufferTexture(unsigned int textureID, Shader& fboDebug) {
 	fboDebug.setVec2("translate", translate);
 	fboDebug.setVec2("scale", scale);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureID);
+	glBindTexture(textureType, textureID);
 	renderQuad();
 }
 
@@ -3899,7 +3899,6 @@ int runScene11() {
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_BLEND); // important for text rendering
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// glfwSwapInterval(0); // disable v-sync
@@ -3950,11 +3949,11 @@ int runScene11() {
 	shader.setBool("useMetallicMap", true);
 	shader.setBool("useRoughnessMap", true);
 	shader.setBool("useAoMap", true);
-	shader.setInt("albedoMap", 0);
-	shader.setInt("normalMap", 1);
-	shader.setInt("metallicMap", 2);
-	shader.setInt("roughnessMap", 3);
-	shader.setInt("aoMap", 4);
+	shader.setInt("albedoMap1", 0);
+	shader.setInt("normalMap1", 1);
+	shader.setInt("metallicMap1", 2);
+	shader.setInt("roughnessMap1", 3);
+	shader.setInt("aoMap1", 4);
 	shader.setBool("useIBL", true);
 	shader.setInt("irradianceMap", 5);
 	shader.setInt("prefilterMap", 6);
@@ -3963,8 +3962,8 @@ int runScene11() {
 	skyboxShader.use();
 	skyboxShader.setInt("environmentMap", 0);
 
-	textShader.use();
-	textShader.setInt("text", 0);
+	//textShader.use();
+	//textShader.setInt("text", 0);
 
 	// Load textures
 	// -------------
@@ -4144,8 +4143,10 @@ int runScene11() {
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	glEnable(GL_CULL_FACE);
 
+	
 	// Font loading
 	// ------------
+	glEnable(GL_BLEND); // important for text rendering
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft)) {
 		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
@@ -4198,11 +4199,12 @@ int runScene11() {
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glDisable(GL_BLEND);
 
 	// Model loading
 	// -------------
 	Model brass_goblets = Model("Models/brass_goblet/brass_goblet.obj");
-	//Model cart = Model("Models/cart/cart.obj");
+	Model cart = Model("Models/cart/cart.obj");
 
 	// render loop
 	// -----------
@@ -4222,7 +4224,7 @@ int runScene11() {
 		// ------
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		glEnable(GL_BLEND);
 		shader.use();
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -4306,7 +4308,7 @@ int runScene11() {
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		shader.setMat4("model", model);
 		shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
-		//cart.Draw(shader);
+		cart.Draw(shader);
 
 		// render skybox
 		glDisable(GL_CULL_FACE);
@@ -4319,7 +4321,7 @@ int runScene11() {
 		glEnable(GL_CULL_FACE);
 
 		// debug fbo
-		//DisplayFramebufferTexture(brdfLUTTexture, fboDebug);
+		DisplayFramebufferTexture(brdfLUTTexture, fboDebug, GL_TEXTURE_2D);
 
 		textShader.use();
 		textShader.setMat4("projection", textProjection);
