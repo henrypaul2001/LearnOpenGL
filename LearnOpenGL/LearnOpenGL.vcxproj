@@ -159,6 +159,7 @@
   <ItemGroup>
     <None Include="advanced_lighting.frag" />
     <None Include="advanced_lighting.vert" />
+    <None Include="anim.vert" />
     <None Include="bloom.frag" />
     <None Include="bloom.vert" />
     <None Include="bloom_final.frag" />
