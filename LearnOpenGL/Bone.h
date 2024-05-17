@@ -28,6 +28,9 @@ public:
 	const std::string GetBoneName() const { return m_Name; }
 	const int GetBoneID() const { return m_ID; }
 
+	/*interpolates  b/w positions,rotations & scaling keys based on the current time of
+	the animation and prepares the local transformation matrix by combining all keys
+	tranformations*/
 	void Update(float animationTime);
 	int GetPositionIndex(float animationTime);
 	int GetRotationIndex(float animationTime);
