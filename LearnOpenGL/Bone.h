@@ -32,8 +32,17 @@ public:
 	the animation and prepares the local transformation matrix by combining all keys
 	tranformations*/
 	void Update(float animationTime);
+
+	/* Gets the current index on mKeyPositions to interpolate to based on
+	the current animation time*/
 	int GetPositionIndex(float animationTime);
+
+	/* Gets the current index on mKeyRotations to interpolate to based on the
+	current animation time*/
 	int GetRotationIndex(float animationTime);
+
+	/* Gets the current index on mKeyScalings to interpolate to based on the
+	current animation time */
 	int GetScaleIndex(float animationTime);
 private:
 	std::vector<KeyPosition> m_Positions;
