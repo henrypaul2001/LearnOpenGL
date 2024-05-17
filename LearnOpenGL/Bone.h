@@ -3,6 +3,8 @@
 #include <glm/ext/quaternion_float.hpp>
 #include <assimp/anim.h>
 #include <vector>
+#include <glm/gtx/quaternion.hpp>
+
 struct KeyPosition {
 	glm::vec3 position;
 	float timeStamp;
