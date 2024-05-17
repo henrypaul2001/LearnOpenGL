@@ -32,7 +32,6 @@ public:
 	int GetPositionIndex(float animationTime);
 	int GetRotationIndex(float animationTime);
 	int GetScaleIndex(float animationTime);
-
 private:
 	std::vector<KeyPosition> m_Positions;
 	std::vector<KeyRotation> m_Rotations;
