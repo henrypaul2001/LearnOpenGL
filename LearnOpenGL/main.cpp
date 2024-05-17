@@ -2103,8 +2103,9 @@ int runScene4() {
 	unsigned int depthCubemap;
 	glGenTextures(1, &depthCubemap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-	for (unsigned int i = 0; i < 6; ++i)
+	for (unsigned int i = 0; i < 6; ++i) {
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -3529,12 +3530,14 @@ int runScene9() {
 	shaderLightingPass.setInt("gNormal", 1);
 	shaderLightingPass.setInt("gAlbedoSpec", 2);
 	shaderLightingPass.setInt("SSAO", 3);
+
 	shaderSSAO.use();
 	shaderSSAO.setInt("gPosition", 0);
 	shaderSSAO.setInt("gNormal", 1);
 	shaderSSAO.setInt("texNoise", 2);
 	shaderSSAO.setInt("scr_width", SCR_WIDTH);
 	shaderSSAO.setInt("scr_height", SCR_HEIGHT);
+
 	shaderSSAOBlur.use();
 	shaderSSAOBlur.setInt("ssaoInput", 0);
 
@@ -3967,13 +3970,13 @@ int runScene11() {
 
 	// Load textures
 	// -------------
-	unsigned int albedo = LoadTexture("Textures/pbr/rusted_iron/albedo.png", GL_REPEAT, true);
-	unsigned int normal = LoadTexture("Textures/pbr/rusted_iron/normal.png", GL_REPEAT, false);
-	unsigned int metallic = LoadTexture("Textures/pbr/rusted_iron/metallic.png", GL_REPEAT, false);
-	unsigned int roughness = LoadTexture("Textures/pbr/rusted_iron/roughness.png", GL_REPEAT, false);
-	unsigned int ao = LoadTexture("Textures/pbr/rusted_iron/ao.png", GL_REPEAT, false);
+	unsigned int albedo = LoadTexture("Textures/pbr/gold/albedo.png", GL_REPEAT, true);
+	unsigned int normal = LoadTexture("Textures/pbr/gold/normal.png", GL_REPEAT, false);
+	unsigned int metallic = LoadTexture("Textures/pbr/gold/metallic.png", GL_REPEAT, false);
+	unsigned int roughness = LoadTexture("Textures/pbr/gold/roughness.png", GL_REPEAT, false);
+	unsigned int ao = LoadTexture("Textures/pbr/gold/ao.png", GL_REPEAT, false);
 
-	unsigned int environmentMap = LoadHDREnvironmentMap("Textures/hdr/newport_loft.hdr", true);
+	unsigned int environmentMap = LoadHDREnvironmentMap("Textures/hdr/studio.hdr", true);
 
 	// lights
 	// ------
@@ -4339,6 +4342,106 @@ int runScene11() {
 	return 0;
 }
 
+int runScene12() {
+	// glfw: initialize and configure
+	// ------------------------------
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	glfwMakeContextCurrent(window);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// glad: load all OpenGL function pointers
+	// ---------------------------------------
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
+
+	int flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(glDebugOutput, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		//glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_MEDIUM, -1, "error message here"); // example of custom error message
+	}
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glEnable(GL_CULL_FACE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// glfwSwapInterval(0); // disable v-sync
+
+	// build and compile shaders
+	// -------------------------
+
+	// initialize static shader uniforms before rendering
+	// --------------------------------------------------
+
+	// Load textures
+	// -------------
+
+	// Model loading
+	// -------------
+
+	// render loop
+	// -----------
+	while (!glfwWindowShouldClose(window))
+	{
+		// per-frame time logic
+		// --------------------
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		// input
+		// -----
+		processInput(window);
+
+		// render
+		// ------
+		
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	// glfw: terminate, clearing all previously allocated GLFW resources.
+	// ------------------------------------------------------------------
+	glfwTerminate();
+	return 0;
+}
+
 int main() {
-	return runScene11();
+	return runScene12();
 }
