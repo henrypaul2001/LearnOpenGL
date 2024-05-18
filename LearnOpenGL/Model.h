@@ -40,6 +40,8 @@ public:
 		return to;
 	}
 
+	auto& GetBoneInfoMap() { return m_BoneInfoMap; }
+	int& GetBoneCount() { return m_BoneCounter; }
 private:
 	const int MAX_BONE_WEIGHTS = 100;
 
@@ -47,9 +49,6 @@ private:
 
 	std::map<std::string, BoneInfo> m_BoneInfoMap;
 	int m_BoneCounter = 0;
-
-	auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-	int& GetBoneCount() { return m_BoneCounter; }
 
 	void SetVertexBoneDataToDefault(Vertex& vertex) {
 		for (int i = 0; i < MAX_BONE_WEIGHTS; i++) {
