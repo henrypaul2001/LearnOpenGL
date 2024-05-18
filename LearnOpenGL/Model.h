@@ -43,7 +43,7 @@ public:
 	auto& GetBoneInfoMap() { return m_BoneInfoMap; }
 	int& GetBoneCount() { return m_BoneCounter; }
 private:
-	const int MAX_BONE_WEIGHTS = 100;
+	const int MAX_BONE_WEIGHTS = 8;
 
 	std::string directory;
 

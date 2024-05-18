@@ -13,6 +13,8 @@
 #include <random>
 
 #include <ft2build.h>
+#include "Animation.h"
+#include "Animator.h"
 #include FT_FREETYPE_H
 
 static float deltaTime = 0.0f;
@@ -4403,7 +4405,7 @@ int runScene12() {
 
 	// build and compile shaders
 	// -------------------------
-	Shader animShader = Shader("anim.vert", "model_loading.frag");
+	Shader animShader = Shader("anim.vert", "anim.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
@@ -4413,6 +4415,9 @@ int runScene12() {
 
 	// Model loading
 	// -------------
+	Model vampire = Model("Models/vampire/dancing_vampire.dae");
+	Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &vampire);
+	Animator animator = Animator(&danceAnimation);
 
 	// render loop
 	// -----------
@@ -4428,9 +4433,33 @@ int runScene12() {
 		// -----
 		processInput(window);
 
+		// update
+		// ------
+		animator.UpdateAnimation(deltaTime);
+		
 		// render
 		// ------
-		
+		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		animShader.use();
+		setupLightingShader(&animShader);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		animShader.setMat4("projection", projection);
+		animShader.setMat4("view", view);
+		animShader.setFloat("shininess", 10.0f);
+		auto transforms = animator.GetFinalBoneMatrices();
+		for (int i = 0; i < transforms.size(); i++) {
+			animShader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+		}
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -0.4f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		animShader.setMat4("model", model);
+		vampire.Draw(animShader);
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);

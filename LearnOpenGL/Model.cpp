@@ -73,7 +73,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		else {
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 		}
-#
+
 		vertices.push_back(vertex);
 	}
 
@@ -85,7 +85,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 	}
 	
-	bool PBR = true;
+	bool PBR = false;
 	// retrieve materials
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -152,7 +152,7 @@ void Model::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* 
 		for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex) {
 			int vertexId = weights[weightIndex].mVertexId;
 			float weight = weights[weightIndex].mWeight;
-			assert(vertexId <= vertices.size());
+			assert(vertexId < vertices.size());
 			SetVertexBoneData(vertices[vertexId], boneID, weight);
 		}
 	}

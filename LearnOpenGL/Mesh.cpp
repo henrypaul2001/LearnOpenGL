@@ -11,7 +11,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 void Mesh::Draw(Shader& shader)
 {
-	bool PBR = true;
+	bool PBR = false;
 
 	if (!PBR) {
 		unsigned int diffuseNr = 1;
@@ -35,7 +35,7 @@ void Mesh::Draw(Shader& shader)
 				number = std::to_string(heightNr++);
 			}
 
-			shader.setFloat(("material." + name + number).c_str(), i);
+			shader.setInt(("material." + name + number).c_str(), i);
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
 		glActiveTexture(GL_TEXTURE0);
