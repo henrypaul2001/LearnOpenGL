@@ -1,6 +1,25 @@
 #pragma once
 #include "MeshNew.h"
-#include "Model.h"
+//#include "Model.h"
+#include <unordered_map>
+
+#include "Shader.h"
+#include "stb_image.h"
+
+#include <vector>
+#include <string>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <map>
+
+#define MAX_BONE_INFLUENCE 8;
+
+struct BoneNew {
+	int BoneID = -1;
+	glm::mat4 offsetMatrix = glm::mat4(1.0f);
+};
+
 class ModelNew
 {
 public:
@@ -10,7 +29,7 @@ public:
 	void Draw(Shader& shader);
 
 	std::vector<MeshNew> meshes;
-	std::vector<Texture> textures_loaded;
+	std::vector<TextureNew> textures_loaded;
 
 	static inline glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
 	{
@@ -23,41 +42,19 @@ public:
 		return to;
 	}
 
-	//auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-	//int& GetBoneCount() { return m_BoneCounter; }
+	const std::unordered_map<std::string, BoneNew>& GetBones() const { return bones; }
+	const int GetNumBones() const { return bones.size(); }
 private:
-	//const int MAX_BONE_WEIGHTS = 8;
-
 	std::string directory;
 
-	//std::map<std::string, BoneInfo> m_BoneInfoMap;
-	//int m_BoneCounter = 0;
+	std::unordered_map<std::string, BoneNew> bones;
 
-	//void SetVertexBoneDataToDefault(Vertex& vertex) {
-	//	for (int i = 0; i < MAX_BONE_WEIGHTS; i++) {
-	//		vertex.m_BoneIDs[i] = -1;
-	//		vertex.m_Weights[i] = 0.0f;
-	//	}
-	//}
-
-	//void SetVertexBoneData(Vertex& vertex, int boneID, float weight)
-	//{
-	//	for (int i = 0; i < MAX_BONE_WEIGHTS; ++i)
-	//	{
-	//		if (vertex.m_BoneIDs[i] < 0)
-	//		{
-	//			vertex.m_Weights[i] = weight;
-	//			vertex.m_BoneIDs[i] = boneID;
-	//			break;
-	//		}
-	//	}
-	//}
-
+	void processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, const aiScene* scene);
 	//void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
 
 	void loadModel(std::string filepath);
 	void processNode(aiNode* node, const aiScene* scene);
 	MeshNew processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+	std::vector<TextureNew> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 	unsigned int TextureFromFile(const char* path, const std::string& directory);
 };

@@ -1,5 +1,5 @@
 #include "MeshNew.h"
-MeshNew::MeshNew(std::vector<VertexNew> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+MeshNew::MeshNew(std::vector<VertexNew> vertices, std::vector<unsigned int> indices, std::vector<TextureNew> textures)
 {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -125,12 +125,12 @@ void MeshNew::setupMesh()
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNew), (void*)offsetof(VertexNew, Bitangent));
 
-	//// ids
-	//glEnableVertexAttribArray(5);
-	//glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexNew), (void*)offsetof(VertexNew, m_BoneIDs));
+	// ids
+	glEnableVertexAttribArray(5);
+	glVertexAttribIPointer(5, 4, GL_INT, sizeof(VertexNew), (void*)offsetof(VertexNew, BoneIDs));
 
-	//// weights
-	//glEnableVertexAttribArray(6);
-	//glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexNew), (void*)offsetof(VertexNew, m_Weights));
-	//glBindVertexArray(0);
+	// weights
+	glEnableVertexAttribArray(6);
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(VertexNew), (void*)offsetof(VertexNew, BoneWeights));
+	glBindVertexArray(0);
 }

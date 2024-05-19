@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
-#include "Mesh.h"
+//#include "Mesh.h"
+#include <glm/glm.hpp>
+#include <string>
+#include "Shader.h"
 
 #define MAX_BONE_INFLUENCE 8
 
@@ -11,11 +14,28 @@ struct VertexNew {
 	glm::vec3 Tangent;
 	glm::vec3 Bitangent;
 
-	//std::vector<BoneNew> Bones;
-	// bone indexes which will influence this vertex
-	//int m_BoneIDs[MAX_BONE_INFLUENCE];
-	// weights from each bone
-	//float m_Weights[MAX_BONE_INFLUENCE];
+	int BoneIDs[MAX_BONE_INFLUENCE] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+	float BoneWeights[MAX_BONE_INFLUENCE] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+	void AddBoneData(int boneID, float boneWeight) {
+		for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
+			if (BoneIDs[i] == -1) {
+				// empty bone slot found
+				BoneIDs[i] = boneID;
+				BoneWeights[i] = boneWeight;
+				return;
+			}
+		}
+
+		// if this line is reached, then there are too many bones
+		assert(0);
+	};
+};
+
+struct TextureNew {
+	unsigned int id;
+	std::string type;
+	std::string filepath;
 };
 
 class MeshNew
@@ -23,13 +43,12 @@ class MeshNew
 public:
 	std::vector<VertexNew> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<TextureNew> textures;
 	unsigned int VAO;
 
-	MeshNew(std::vector<VertexNew> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	MeshNew(std::vector<VertexNew> vertices, std::vector<unsigned int> indices, std::vector<TextureNew> textures);
 	void Draw(Shader& shader);
 private:
 	unsigned int VBO, EBO;
 	void setupMesh();
-};
 };

@@ -37,7 +37,7 @@ MeshNew ModelNew::processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	std::vector<VertexNew> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<TextureNew> textures;
 
 	// retrieve vertices
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -91,46 +91,79 @@ MeshNew ModelNew::processMesh(aiMesh* mesh, const aiScene* scene)
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 		if (!PBR) {
-			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+			std::vector<TextureNew> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-			std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular"); // roughness map
+			std::vector<TextureNew> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular"); // roughness map
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+			std::vector<TextureNew> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-			std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height"); // AO
+			std::vector<TextureNew> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height"); // AO
 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 		}
 		else {
 			// PBR
-			std::vector<Texture> albedoMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "albedoMap");
+			std::vector<TextureNew> albedoMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "albedoMap");
 			textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
 
-			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "normalMap");
+			std::vector<TextureNew> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "normalMap");
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-			std::vector<Texture> metallicMaps = loadMaterialTextures(material, aiTextureType_SHININESS, "metallicMap");
+			std::vector<TextureNew> metallicMaps = loadMaterialTextures(material, aiTextureType_SHININESS, "metallicMap");
 			textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
 
-			std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "roughnessMap");
+			std::vector<TextureNew> roughnessMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "roughnessMap");
 			textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
 
-			std::vector<Texture> aoMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "aoMap");
+			std::vector<TextureNew> aoMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "aoMap");
 			textures.insert(textures.end(), aoMaps.begin(), aoMaps.end());
 		}
 	}
 
 	// retrieve bones
+	if (mesh->HasBones()) {
+		processBones(vertices, mesh, scene);
+	}
 
 	return MeshNew(vertices, indices, textures);
 }
 
-
-std::vector<Texture> ModelNew::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+void ModelNew::processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, const aiScene* scene)
 {
-	std::vector<Texture> textures;
+	for (unsigned int i = 0; i < mesh->mNumBones; i++) {
+		// Get boneID
+		// ----------
+		int boneID = -1;
+		std::string boneName = mesh->mBones[i]->mName.C_Str();
+
+		if (bones.find(boneName) == bones.end()) {
+			// Create new bone
+			BoneNew newBone;
+			boneID = bones.size();
+			newBone.BoneID = boneID;
+			newBone.offsetMatrix = ConvertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
+			bones[boneName] = newBone;
+		}
+		else {
+			// Bone already exists
+			boneID = bones[boneName].BoneID;
+		}
+
+		// Update vertices with IDs and weights
+		for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+			const aiVertexWeight& weight = mesh->mBones[i]->mWeights[j];
+			int vertexID = weight.mVertexId;
+			assert(vertexID < vertices.size());
+			vertices[vertexID].AddBoneData(boneID, weight.mWeight);
+		}
+	}
+}
+
+std::vector<TextureNew> ModelNew::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+{
+	std::vector<TextureNew> textures;
 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
@@ -146,7 +179,7 @@ std::vector<Texture> ModelNew::loadMaterialTextures(aiMaterial* mat, aiTextureTy
 		}
 
 		if (!skip) {
-			Texture texture;
+			TextureNew texture;
 			texture.id = TextureFromFile(str.C_Str(), directory);
 			texture.type = typeName;
 			texture.filepath = str.C_Str();

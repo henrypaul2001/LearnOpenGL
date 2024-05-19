@@ -8,13 +8,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
-#include "Model.h"
+//#include "Model.h"
 #include <map>
 #include <random>
 
 #include <ft2build.h>
 #include "Animation.h"
 #include "Animator.h"
+#include "ModelNew.h"
 #include FT_FREETYPE_H
 
 static float deltaTime = 0.0f;
@@ -4415,9 +4416,9 @@ int runScene12() {
 
 	// Model loading
 	// -------------
-	Model vampire = Model("Models/vampire/dancing_vampire.dae");
-	Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &vampire);
-	Animator animator = Animator(&danceAnimation);
+	ModelNew vampire = ModelNew("Models/vampire/dancing_vampire.dae");
+	//Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &vampire);
+	//Animator animator = Animator(&danceAnimation);
 
 	// render loop
 	// -----------
@@ -4435,7 +4436,7 @@ int runScene12() {
 
 		// update
 		// ------
-		animator.UpdateAnimation(deltaTime);
+		//animator.UpdateAnimation(deltaTime);
 		
 		// render
 		// ------
@@ -4449,10 +4450,10 @@ int runScene12() {
 		animShader.setMat4("projection", projection);
 		animShader.setMat4("view", view);
 		animShader.setFloat("shininess", 10.0f);
-		auto transforms = animator.GetFinalBoneMatrices();
-		for (int i = 0; i < transforms.size(); i++) {
-			animShader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
-		}
+		//auto transforms = animator.GetFinalBoneMatrices();
+		//for (int i = 0; i < transforms.size(); i++) {
+			//animShader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+		//}
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.4f, 0.0f));
