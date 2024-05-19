@@ -148,7 +148,9 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshNew.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelNew.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
   </ItemGroup>
@@ -158,7 +160,9 @@
     <ClInclude Include="Bone.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshNew.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelNew.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
