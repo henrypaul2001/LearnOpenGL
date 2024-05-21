@@ -18,8 +18,10 @@
 struct BoneNew {
 	int BoneID = -1;
 	glm::mat4 offsetMatrix = glm::mat4(1.0f);
+	glm::mat4 finalTransform = glm::mat4(1.0f);
+	glm::mat4 nodeTransform = glm::mat4(1.0f);
 
-	std::vector<std::string> childBoneNames;
+	std::vector<std::string> childNodeNames;
 };
 
 class ModelNew
@@ -44,12 +46,17 @@ public:
 		return to;
 	}
 
-	const std::unordered_map<std::string, BoneNew>& GetBones() const { return bones; }
+	const std::map<std::string, BoneNew>& GetBones() const { return bones; }
+	const BoneNew* GetRootBone() const { return rootBone; }
 	const int GetNumBones() const { return bones.size(); }
+	void GetBoneTransforms(std::vector<glm::mat4>& out_transforms);
 private:
 	std::string directory;
 
-	std::unordered_map<std::string, BoneNew> bones;
+	std::map<std::string, BoneNew> bones;
+	BoneNew* rootBone;
+
+	void ProcessChildBonesFinalTransformRecursive(BoneNew& bone, const glm::mat4& parentTransform);
 
 	void processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, const aiScene* scene);
 	//void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);

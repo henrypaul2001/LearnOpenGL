@@ -130,6 +130,37 @@ MeshNew ModelNew::processMesh(aiMesh* mesh, const aiScene* scene)
 	return MeshNew(vertices, indices, textures);
 }
 
+void ModelNew::GetBoneTransforms(std::vector<glm::mat4>& out_transforms)
+{
+	out_transforms.resize(bones.size());
+
+	glm::mat4 identityTransform = glm::mat4(1.0f);
+
+	ProcessChildBonesFinalTransformRecursive(*rootBone, identityTransform);
+
+	auto it = bones.begin();
+	for (unsigned int i = 0; i < bones.size(); i++) {
+		out_transforms[i] = it->second.finalTransform;
+		it++;
+	}
+}
+
+void ModelNew::ProcessChildBonesFinalTransformRecursive(BoneNew& bone, const glm::mat4& parentTransform)
+{
+	glm::mat4 nodeTransform = bone.nodeTransform;
+
+	glm::mat4 globalTransform = parentTransform * nodeTransform;
+
+	bone.finalTransform = globalTransform * bone.offsetMatrix;
+
+	for (std::string& boneName : bone.childNodeNames) {
+		if (bones.find(boneName) != bones.end()) {
+			BoneNew& child = bones[boneName];
+			ProcessChildBonesFinalTransformRecursive(child, globalTransform);
+		}
+	}
+}
+
 void ModelNew::processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, const aiScene* scene)
 {
 	for (unsigned int i = 0; i < mesh->mNumBones; i++) {
@@ -137,22 +168,26 @@ void ModelNew::processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, cons
 		// ----------
 		int boneID = -1;
 		std::string boneName = mesh->mBones[i]->mName.C_Str();
-
+		
 		if (bones.find(boneName) == bones.end()) {
 			// Create new bone
 			BoneNew newBone;
 			boneID = bones.size();
 			newBone.BoneID = boneID;
 			newBone.offsetMatrix = ConvertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
-			
+			newBone.nodeTransform = ConvertMatrixToGLMFormat(mesh->mBones[i]->mNode->mTransformation);
 
 			// Get child bone names
 			for (unsigned int j = 0; j < mesh->mBones[i]->mNode->mNumChildren; j++) {
 				std::string childName = mesh->mBones[i]->mNode->mChildren[j]->mName.C_Str();
-				newBone.childBoneNames.push_back(childName);
+				newBone.childNodeNames.push_back(childName);
 			}
 
 			bones[boneName] = newBone;
+
+			if (mesh->mBones[i]->mNode->mParent == nullptr || (mesh->mBones[i]->mNode->mParent->mName == aiString("RootNode") && mesh->mBones[i]->mNode->mParent->mNumMeshes == 0)) {
+				rootBone = &bones[boneName];
+			}
 		}
 		else {
 			// Bone already exists

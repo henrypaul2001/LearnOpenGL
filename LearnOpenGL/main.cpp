@@ -4417,6 +4417,8 @@ int runScene12() {
 	// Model loading
 	// -------------
 	ModelNew vampire = ModelNew("Models/vampire/dancing_vampire.dae");
+	std::vector<glm::mat4> transforms;
+	vampire.GetBoneTransforms(transforms);
 	//Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &vampire);
 	//Animator animator = Animator(&danceAnimation);
 
