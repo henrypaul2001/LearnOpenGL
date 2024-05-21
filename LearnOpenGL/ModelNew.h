@@ -18,6 +18,8 @@
 struct BoneNew {
 	int BoneID = -1;
 	glm::mat4 offsetMatrix = glm::mat4(1.0f);
+
+	std::vector<std::string> childBoneNames;
 };
 
 class ModelNew

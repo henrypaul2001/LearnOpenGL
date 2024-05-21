@@ -10,7 +10,7 @@ void ModelNew::Draw(Shader& shader)
 void ModelNew::loadModel(std::string filepath)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PopulateArmatureData);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -144,6 +144,14 @@ void ModelNew::processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, cons
 			boneID = bones.size();
 			newBone.BoneID = boneID;
 			newBone.offsetMatrix = ConvertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
+			
+
+			// Get child bone names
+			for (unsigned int j = 0; j < mesh->mBones[i]->mNode->mNumChildren; j++) {
+				std::string childName = mesh->mBones[i]->mNode->mChildren[j]->mName.C_Str();
+				newBone.childBoneNames.push_back(childName);
+			}
+
 			bones[boneName] = newBone;
 		}
 		else {
