@@ -185,9 +185,14 @@ void ModelNew::processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, cons
 
 			bones[boneName] = newBone;
 
-			if (mesh->mBones[i]->mNode->mParent == nullptr || (mesh->mBones[i]->mNode->mParent->mName == aiString("RootNode") && mesh->mBones[i]->mNode->mParent->mNumMeshes == 0)) {
+			if (bones.find(mesh->mBones[i]->mNode->mParent->mName.C_Str()) == bones.end()) {
+				// Parent node name is not in bones list, this bone must be the root bone
 				rootBone = &bones[boneName];
 			}
+
+			//if (mesh->mBones[i]->mNode->mParent == nullptr || (mesh->mBones[i]->mNode->mParent->mName == aiString("RootNode") && mesh->mBones[i]->mNode->mParent->mNumMeshes == 0)) {
+				//rootBone = &bones[boneName];
+			//}
 		}
 		else {
 			// Bone already exists

@@ -13,8 +13,6 @@
 #include <assimp/postprocess.h>
 #include <map>
 
-#define MAX_BONE_INFLUENCE 8;
-
 struct BoneNew {
 	int BoneID = -1;
 	glm::mat4 offsetMatrix = glm::mat4(1.0f);
