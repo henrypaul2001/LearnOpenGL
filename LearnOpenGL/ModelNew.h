@@ -48,11 +48,13 @@ public:
 	const BoneNew* GetRootBone() const { return rootBone; }
 	const int GetNumBones() const { return bones.size(); }
 	void GetBoneTransforms(std::vector<glm::mat4>& out_transforms);
+	const glm::mat4& GetSkeletonOriginTransform() const { return skeletonOriginTransform; }
 private:
 	std::string directory;
 
 	std::map<std::string, BoneNew> bones;
 	BoneNew* rootBone;
+	glm::mat4 skeletonOriginTransform;
 
 	void ProcessChildBonesFinalTransformRecursive(BoneNew& bone, const glm::mat4& parentTransform);
 

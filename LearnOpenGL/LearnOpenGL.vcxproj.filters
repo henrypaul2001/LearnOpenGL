@@ -346,5 +346,8 @@
     <None Include="anim.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="animNew.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>

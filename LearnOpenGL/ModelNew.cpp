@@ -10,7 +10,7 @@ void ModelNew::Draw(Shader& shader)
 void ModelNew::loadModel(std::string filepath)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PopulateArmatureData);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PopulateArmatureData | aiProcess_GenNormals);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -134,9 +134,7 @@ void ModelNew::GetBoneTransforms(std::vector<glm::mat4>& out_transforms)
 {
 	out_transforms.resize(bones.size());
 
-	glm::mat4 identityTransform = glm::mat4(1.0f);
-
-	ProcessChildBonesFinalTransformRecursive(*rootBone, identityTransform);
+	ProcessChildBonesFinalTransformRecursive(*rootBone, skeletonOriginTransform);
 
 	auto it = bones.begin();
 	for (unsigned int i = 0; i < bones.size(); i++) {
@@ -188,11 +186,8 @@ void ModelNew::processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, cons
 			if (bones.find(mesh->mBones[i]->mNode->mParent->mName.C_Str()) == bones.end()) {
 				// Parent node name is not in bones list, this bone must be the root bone
 				rootBone = &bones[boneName];
+				skeletonOriginTransform = ConvertMatrixToGLMFormat(mesh->mBones[i]->mNode->mParent->mTransformation);
 			}
-
-			//if (mesh->mBones[i]->mNode->mParent == nullptr || (mesh->mBones[i]->mNode->mParent->mName == aiString("RootNode") && mesh->mBones[i]->mNode->mParent->mNumMeshes == 0)) {
-				//rootBone = &bones[boneName];
-			//}
 		}
 		else {
 			// Bone already exists

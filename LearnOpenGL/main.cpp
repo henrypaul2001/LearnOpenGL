@@ -4406,7 +4406,7 @@ int runScene12() {
 
 	// build and compile shaders
 	// -------------------------
-	Shader animShader = Shader("anim.vert", "anim.frag");
+	Shader animShader = Shader("animNew.vert", "anim.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
@@ -4416,12 +4416,12 @@ int runScene12() {
 
 	// Model loading
 	// -------------
-	ModelNew vampire = ModelNew("Models/vampire/dancing_vampire.dae");
-	std::vector<glm::mat4> transforms;
-	vampire.GetBoneTransforms(transforms);
-	//Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &vampire);
-	//Animator animator = Animator(&danceAnimation);
+	Model testModel = Model("Models/vampire/dancing_vampire.dae");
+	//ModelNew testModelNew = ModelNew("Models/vampire/dancing_vampire.dae");
+	ModelNew testModelNew = ModelNew("Models/boblampclean/boblampclean.md5mesh");
 
+	Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &testModel);
+	Animator animator = Animator(&danceAnimation);
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -4438,7 +4438,7 @@ int runScene12() {
 
 		// update
 		// ------
-		//animator.UpdateAnimation(deltaTime);
+		animator.UpdateAnimation(0.0f);
 		
 		// render
 		// ------
@@ -4452,16 +4452,33 @@ int runScene12() {
 		animShader.setMat4("projection", projection);
 		animShader.setMat4("view", view);
 		animShader.setFloat("shininess", 10.0f);
-		//auto transforms = animator.GetFinalBoneMatrices();
-		//for (int i = 0; i < transforms.size(); i++) {
-			//animShader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
-		//}
+
+		std::vector<glm::mat4> transforms;
+		//testModel.GetBoneTransforms(transforms);
+		transforms = animator.GetFinalBoneMatrices();
+		for (int i = 0; i < transforms.size(); i++) {
+			animShader.setMat4("boneTransforms[" + std::to_string(i) + "]", transforms[i]);
+		}
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -0.4f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		model = glm::translate(model, glm::vec3(0.0f, -1.4f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
 		animShader.setMat4("model", model);
-		vampire.Draw(animShader);
+		testModel.Draw(animShader);
+
+		std::vector<glm::mat4> transformsNew;
+		testModelNew.GetBoneTransforms(transformsNew);
+
+		for (int i = 0; i < transformsNew.size(); i++) {
+			animShader.setMat4("boneTransforms[" + std::to_string(i) + "]", transformsNew[i]);
+		}
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(5.0f, -1.4f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		animShader.setMat4("model", model);
+		testModelNew.Draw(animShader);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
