@@ -142,7 +142,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationChannel.cpp" />
+    <ClCompile Include="AnimationNew.cpp" />
     <ClCompile Include="Animator.cpp" />
+    <ClCompile Include="AnimatorNew.cpp" />
     <ClCompile Include="Bone.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="glad.c" />
@@ -156,7 +159,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationChannel.h" />
+    <ClInclude Include="AnimationNew.h" />
     <ClInclude Include="Animator.h" />
+    <ClInclude Include="AnimatorNew.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Mesh.h" />

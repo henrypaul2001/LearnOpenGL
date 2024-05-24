@@ -174,6 +174,7 @@ void ModelNew::processBones(std::vector<VertexNew>& vertices, aiMesh* mesh, cons
 			newBone.BoneID = boneID;
 			newBone.offsetMatrix = ConvertMatrixToGLMFormat(mesh->mBones[i]->mOffsetMatrix);
 			newBone.nodeTransform = ConvertMatrixToGLMFormat(mesh->mBones[i]->mNode->mTransformation);
+			newBone.Name = boneName;
 
 			// Get child bone names
 			for (unsigned int j = 0; j < mesh->mBones[i]->mNode->mNumChildren; j++) {

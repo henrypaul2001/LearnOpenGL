@@ -12,7 +12,7 @@ uniform mat4 model;
 
 const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
-uniform mat4 finalBonesMatrices[MAX_BONES];
+uniform mat4 boneTransforms[MAX_BONES];
 
 out vec2 TexCoords;
 out vec3 FragPos;
@@ -28,9 +28,9 @@ void main() {
 			totalPosition = vec4(pos, 1.0);
 			break;
 		}
-		vec4 localPosition = finalBonesMatrices[boneIds[i]] * vec4(pos, 1.0);
+		vec4 localPosition = boneTransforms[boneIds[i]] * vec4(pos, 1.0);
 		totalPosition += localPosition * weights[i];
-		vec3 localNormal = mat3(finalBonesMatrices[boneIds[i]]) * normal;
+		vec3 localNormal = mat3(boneTransforms[boneIds[i]]) * normal;
 	}
 
 	mat4 viewModel = view * model;

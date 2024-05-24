@@ -15,6 +15,7 @@
 
 struct BoneNew {
 	int BoneID = -1;
+	std::string Name;
 	glm::mat4 offsetMatrix = glm::mat4(1.0f);
 	glm::mat4 finalTransform = glm::mat4(1.0f);
 	glm::mat4 nodeTransform = glm::mat4(1.0f);
