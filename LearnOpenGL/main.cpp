@@ -4408,7 +4408,7 @@ int runScene12() {
 
 	// build and compile shaders
 	// -------------------------
-	Shader animShader = Shader("anim.vert", "anim.frag");
+	Shader animShader = Shader("animNew.vert", "anim.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
