@@ -4419,15 +4419,20 @@ int runScene12() {
 	// Model loading
 	// -------------
 	Model testModel = Model("Models/vampire/dancing_vampire.dae");
-	ModelNew testModelNew = ModelNew("Models/vampire/dancing_vampire.dae");
+	ModelNew testModelNew = ModelNew("Models/gas_mask/Ch35_nonPBR.dae");
 	//ModelNew testModelNew = ModelNew("Models/boblampclean/boblampclean.md5mesh");
 
 	Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &testModel);
 	Animator animator = Animator(&danceAnimation);
 
-	AnimationNew danceAnimationNew = AnimationNew("Models/vampire/dancing_vampire.dae");
+	//AnimationNew danceAnimationNew = AnimationNew("Models/vampire/dancing_vampire.dae");
 	//AnimationNew danceAnimationNew = AnimationNew("Animations/boblampclean.md5anim"); // edge case: two root bones (two bones that both point to an origin node that isn't a bone, as their parent). Causes only one of the skeletons to be rendered. In this case, the sword
-	AnimatorNew animatorNew = AnimatorNew(&danceAnimationNew, &testModelNew);
+	AnimationNew emerging = AnimationNew("Animations/emerging.dae");
+	AnimationNew flair = AnimationNew("Animations/flair.dae");
+	AnimationNew trip = AnimationNew("Animations/trip.dae");
+	AnimationNew gunplay = AnimationNew("Animations/gunplay.dae");
+	AnimationNew roll = AnimationNew("Animations/roll.dae");
+	AnimatorNew animatorNew = AnimatorNew(&flair, &testModelNew);
 
 	// render loop
 	// -----------
