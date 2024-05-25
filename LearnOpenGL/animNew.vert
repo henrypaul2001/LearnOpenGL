@@ -10,7 +10,7 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-const int MAX_BONES = 100;
+const int MAX_BONES = 200;
 const int MAX_BONE_INFLUENCE = 8;
 uniform mat4 boneTransforms[MAX_BONES];
 

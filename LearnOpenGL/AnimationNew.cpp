@@ -3,7 +3,7 @@
 AnimationNew::AnimationNew(const std::string& animationPath)
 {
 	ReadChannels(animationPath);
-	m_FinalBoneMatrices = std::vector<glm::mat4>(100);
+	m_FinalBoneMatrices = std::vector<glm::mat4>(200);
 }
 
 AnimationNew::~AnimationNew() {}

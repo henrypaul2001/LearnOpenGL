@@ -18,8 +18,14 @@ struct VertexNew {
 	float BoneWeights[MAX_BONE_INFLUENCE] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 	void AddBoneData(int boneID, float boneWeight) {
+
+		if (boneWeight == 0.0f) {
+			// skip bone
+			return;
+		}
+
 		for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
-			if (BoneIDs[i] == -1) {
+			if (BoneIDs[i] == -1 && BoneIDs[i] != boneID) {
 				// empty bone slot found
 				BoneIDs[i] = boneID;
 				BoneWeights[i] = boneWeight;
