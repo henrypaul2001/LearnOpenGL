@@ -8,7 +8,7 @@ class AnimationNew
 {
 public:
 	AnimationNew() = default;
-	AnimationNew(const std::string& animationPath, int animationIndex);
+	AnimationNew(const std::string& animationPath, int animationIndex = 0);
 	~AnimationNew();
 
 	void Update(const float deltaTime, const float currentTime, ModelNew* animationTarget);
