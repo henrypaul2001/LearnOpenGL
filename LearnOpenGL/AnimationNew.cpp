@@ -1,8 +1,8 @@
 #include "AnimationNew.h"
 
-AnimationNew::AnimationNew(const std::string& animationPath)
+AnimationNew::AnimationNew(const std::string& animationPath, int animationIndex)
 {
-	ReadChannels(animationPath);
+	ReadChannels(animationPath, animationIndex);
 	m_FinalBoneMatrices = std::vector<glm::mat4>(200);
 }
 
@@ -21,11 +21,16 @@ AnimationChannel* AnimationNew::FindAnimationChannel(const std::string& channelN
 	return nullptr;
 }
 
-void AnimationNew::ReadChannels(const std::string& animationPath)
+void AnimationNew::ReadChannels(const std::string& animationPath, int animationIndex)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
 	assert(scene && scene->mRootNode);
+
+	if (animationIndex > scene->mNumAnimations - 1) {
+		assert(0);
+	}
+
 	auto animation = scene->mAnimations[0];
 	m_Duration = animation->mDuration;
 	m_TicksPerSecond = animation->mTicksPerSecond;

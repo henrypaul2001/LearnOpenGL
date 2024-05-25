@@ -8,7 +8,7 @@ class AnimationNew
 {
 public:
 	AnimationNew() = default;
-	AnimationNew(const std::string& animationPath);
+	AnimationNew(const std::string& animationPath, int animationIndex);
 	~AnimationNew();
 
 	void Update(const float deltaTime, const float currentTime, ModelNew* animationTarget);
@@ -31,7 +31,7 @@ private:
 
 	void CalculateBoneTransformsRecursive(const BoneNew& bone, const glm::mat4& parentTransform, const ModelNew* animationTarget, const float currentTime);
 
-	void ReadChannels(const std::string& animationPath);
+	void ReadChannels(const std::string& animationPath, int animationIndex);
 
 	float m_Duration;
 	int m_TicksPerSecond;
