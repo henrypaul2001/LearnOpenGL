@@ -4425,7 +4425,7 @@ int runScene12() {
 	Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &testModel);
 	Animator animator = Animator(&danceAnimation);
 
-	AnimationNew danceAnimationNew = AnimationNew("Models/vampire/dancing_vampire.dae", 1);
+	AnimationNew danceAnimationNew = AnimationNew("Models/vampire/dancing_vampire.dae");
 	//AnimationNew danceAnimationNew = AnimationNew("Animations/boblampclean.md5anim"); // edge case: two root bones (two bones that both point to an origin node that isn't a bone, as their parent). Causes only one of the skeletons to be rendered. In this case, the sword
 	AnimatorNew animatorNew = AnimatorNew(&danceAnimationNew, &testModelNew);
 

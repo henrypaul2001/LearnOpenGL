@@ -16,7 +16,6 @@ void AnimatorNew::UpdateAnimation(float dt)
 {
 	m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
 	m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
-
 	m_CurrentAnimation->Update(dt, m_CurrentTime, m_AnimationTarget);
 }
 
