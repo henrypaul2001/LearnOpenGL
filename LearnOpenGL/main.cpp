@@ -28,6 +28,8 @@ static float deltaTime = 0.0f;
 // Audio engine
 irrklang::ISoundEngine* soundEngine;
 
+irrklang::ISoundEffectControl* fx = nullptr;
+
 float posOnCircle = 0.0f;
 const float radius = 5.0f;
 
@@ -168,6 +170,37 @@ void processInput(GLFWwindow* window) {
 		irrklang::vec3df pos = irrklang::vec3df(fmodf((float)rand(), radius * 2.0f) - radius, 0.0f, 0.0f);
 
 		soundEngine->play3D("Audio/explosion.wav", pos);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS) {
+		if (fx->isDistortionSoundEffectEnabled()) {
+			fx->disableDistortionSoundEffect();
+		}
+		else {
+			fx->enableDistortionSoundEffect();
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS) {
+		if (fx->isEchoSoundEffectEnabled()) {
+			fx->disableEchoSoundEffect();
+		}
+		else {
+			fx->enableEchoSoundEffect();
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS) {
+		if (fx->isWavesReverbSoundEffectEnabled()) {
+			fx->disableWavesReverbSoundEffect();
+		}
+		else {
+			fx->enableWavesReverbSoundEffect();
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS) {
+		fx->disableAllEffects();
 	}
 }
 
@@ -4612,10 +4645,22 @@ int runScene13() {
 
 	// Play a sound stream, looped, in 3D space
 	irrklang::ISound* music = nullptr;
-	music = soundEngine->play3D("Audio/ophelia.mp3", irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
+	//music = soundEngine->play3D("Audio/ophelia.mp3", irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
 
 	if (music) {
 		music->setMinDistance(5.0f);
+	}
+
+	irrklang::ISound* music2 = nullptr;
+	music2 = soundEngine->play2D("Audio/MF-W-90.XM", true, false, true, irrklang::ESM_AUTO_DETECT, true);
+
+	if (music2) {
+		fx = music2->getSoundEffectControl();
+	}
+
+	if (!fx) {
+		std::cout << "This device or sound does not support sound effects" << std::endl;
+		return 0;
 	}
 
 	// test.wav, converted to this array by bin2h tool
@@ -4835,6 +4880,7 @@ int runScene13() {
 	glfwTerminate();
 	soundEngine->drop();
 	if (music) { music->drop(); }
+	if (music2) { music2->drop(); }
 	return 0;
 }
 
