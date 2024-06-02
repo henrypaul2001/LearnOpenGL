@@ -13,6 +13,7 @@ public:
 	//void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform);
 
 private:
+	bool paused;
 	ModelNew* m_AnimationTarget;
 	AnimationNew* m_CurrentAnimation;
 	float m_CurrentTime;

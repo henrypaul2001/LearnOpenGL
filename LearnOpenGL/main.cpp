@@ -20,6 +20,8 @@
 #include "AnimatorNew.h"
 #include FT_FREETYPE_H
 
+#include "irrKlang/irrKlang.h"
+
 static float deltaTime = 0.0f;
 
 // Camera
@@ -4419,8 +4421,9 @@ int runScene12() {
 	// Model loading
 	// -------------
 	Model testModel = Model("Models/vampire/dancing_vampire.dae");
-	ModelNew testModelNew = ModelNew("Models/gas_mask/Ch35_nonPBR.dae");
+	//ModelNew testModelNew = ModelNew("Models/gas_mask/Ch35_nonPBR.dae");
 	//ModelNew testModelNew = ModelNew("Models/boblampclean/boblampclean.md5mesh");
+	ModelNew testModelNew = ModelNew("Models/swatNew/swatNew.dae");
 
 	Animation danceAnimation = Animation("Models/vampire/dancing_vampire.dae", &testModel);
 	Animator animator = Animator(&danceAnimation);
@@ -4506,6 +4509,121 @@ int runScene12() {
 	return 0;
 }
 
+int runScene13() {
+	// glfw: initialize and configure
+	// ------------------------------
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	glfwMakeContextCurrent(window);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// glad: load all OpenGL function pointers
+	// ---------------------------------------
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
+
+	int flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(glDebugOutput, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		//glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_MEDIUM, -1, "error message here"); // example of custom error message
+	}
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glEnable(GL_CULL_FACE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// glfwSwapInterval(0); // disable v-sync
+
+	// build and compile shaders
+	// -------------------------
+
+	// initialize static shader uniforms before rendering
+	// --------------------------------------------------
+
+	// Load textures
+	// -------------
+
+	// Model loading
+	// -------------
+
+	// Audio setup
+	// -----------
+	irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
+
+	if (!soundEngine) {
+		std::cout << "Error initialising sound engine" << std::endl;
+		glfwTerminate();
+		return 0;
+	}
+
+	// render loop
+	// -----------
+	while (!glfwWindowShouldClose(window))
+	{
+		// per-frame time logic
+		// --------------------
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		// input
+		// -----
+		processInput(window);
+
+		// update
+		// ------
+
+		// render
+		// ------
+		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	// glfw: terminate, clearing all previously allocated GLFW resources.
+	// ------------------------------------------------------------------
+	glfwTerminate();
+	return 0;
+}
+
 int main() {
-	return runScene12();
+	return runScene13();
 }
