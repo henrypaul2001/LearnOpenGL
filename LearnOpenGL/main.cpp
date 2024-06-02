@@ -4590,6 +4590,9 @@ int runScene13() {
 		return 0;
 	}
 
+	// Play 2d sound
+	soundEngine->play2D("Audio/getout.ogg", true);
+
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
