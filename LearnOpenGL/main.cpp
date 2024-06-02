@@ -27,6 +27,9 @@ static float deltaTime = 0.0f;
 // Audio engine
 irrklang::ISoundEngine* soundEngine;
 
+float posOnCircle = 0.0f;
+const float radius = 5.0f;
+
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
 float lastX = 400, lastY = 300;
@@ -161,7 +164,9 @@ void processInput(GLFWwindow* window) {
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		soundEngine->play2D("Audio/bell.wav");
+		irrklang::vec3df pos = irrklang::vec3df(fmodf((float)rand(), radius * 2.0f) - radius, 0.0f, 0.0f);
+
+		soundEngine->play3D("Audio/explosion.wav", pos);
 	}
 }
 
@@ -4598,7 +4603,14 @@ int runScene13() {
 	}
 
 	// Play 2d sound
-	soundEngine->play2D("Audio/getout.ogg", true);
+	//soundEngine->play2D("Audio/getout.ogg", true);
+
+	// Play a sound stream, looped, in 3D space
+	irrklang::ISound* music = soundEngine->play3D("Audio/ophelia.mp3", irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
+
+	if (music) {
+		music->setMinDistance(5.0f);
+	}
 
 	// render loop
 	// -----------
@@ -4616,6 +4628,14 @@ int runScene13() {
 
 		// update
 		// ------
+		posOnCircle += 0.04f * deltaTime;
+		irrklang::vec3df pos3d = irrklang::vec3df(radius * cosf(posOnCircle), 0.0f, radius * sinf(posOnCircle * 0.5f));
+
+		soundEngine->setListenerPosition(irrklang::vec3df(0.0f, 0.0f, 0.0f), irrklang::vec3df(0.0f, 0.0f, 1.0f));
+
+		if (music) {
+			music->setPosition(pos3d);
+		}
 
 		// render
 		// ------
@@ -4632,6 +4652,7 @@ int runScene13() {
 	// ------------------------------------------------------------------
 	glfwTerminate();
 	soundEngine->drop();
+	music->drop();
 	return 0;
 }
 
