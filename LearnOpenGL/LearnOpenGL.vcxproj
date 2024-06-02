@@ -148,6 +148,8 @@
     <ClCompile Include="AnimatorNew.cpp" />
     <ClCompile Include="Bone.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CMyFileFactory.cpp" />
+    <ClCompile Include="CMyReadFile.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -165,6 +167,8 @@
     <ClInclude Include="AnimatorNew.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CMyFileFactory.h" />
+    <ClInclude Include="CMyReadFile.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshNew.h" />
     <ClInclude Include="Model.h" />

@@ -21,6 +21,7 @@
 #include FT_FREETYPE_H
 
 #include "irrKlang/irrKlang.h"
+#include "CMyFileFactory.h"
 
 static float deltaTime = 0.0f;
 
@@ -4602,12 +4603,16 @@ int runScene13() {
 		return 0;
 	}
 
+	CMyFileFactory* factory = new CMyFileFactory();
+	soundEngine->addFileFactory(factory);
+	factory->drop();
+
 	// Play 2d sound
 	//soundEngine->play2D("Audio/getout.ogg", true);
 
 	// Play a sound stream, looped, in 3D space
 	irrklang::ISound* music = nullptr;
-	//music = soundEngine->play3D("Audio/ophelia.mp3", irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
+	music = soundEngine->play3D("Audio/ophelia.mp3", irrklang::vec3df(0.0f, 0.0f, 0.0f), true, false, true);
 
 	if (music) {
 		music->setMinDistance(5.0f);
@@ -4812,7 +4817,7 @@ int runScene13() {
 		}
 
 		// awful, awful noise
-		soundEngine->play2D("testsound.wav");
+		//soundEngine->play2D("testsound.wav");
 
 		// render
 		// ------

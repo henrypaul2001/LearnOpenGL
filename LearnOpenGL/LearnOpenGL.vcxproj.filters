@@ -72,6 +72,12 @@
     <ClCompile Include="AnimationChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CMyFileFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CMyReadFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -111,6 +117,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AnimationChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMyFileFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMyReadFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
