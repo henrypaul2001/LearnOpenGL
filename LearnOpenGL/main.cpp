@@ -24,6 +24,9 @@
 
 static float deltaTime = 0.0f;
 
+// Audio engine
+irrklang::ISoundEngine* soundEngine;
+
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
 float lastX = 400, lastY = 300;
@@ -155,6 +158,10 @@ void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
 		bloomPasses += 1;
 		std::cout << "Bloom passes = " << bloomPasses << std::endl;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		soundEngine->play2D("Audio/bell.wav");
 	}
 }
 
@@ -4582,7 +4589,7 @@ int runScene13() {
 
 	// Audio setup
 	// -----------
-	irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
+	soundEngine = irrklang::createIrrKlangDevice();
 
 	if (!soundEngine) {
 		std::cout << "Error initialising sound engine" << std::endl;
@@ -4624,6 +4631,7 @@ int runScene13() {
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
 	glfwTerminate();
+	soundEngine->drop();
 	return 0;
 }
 
