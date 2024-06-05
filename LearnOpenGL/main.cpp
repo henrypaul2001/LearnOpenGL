@@ -4945,6 +4945,7 @@ int runScene14() {
 
 	// build and compile shaders
 	// -------------------------
+	Shader particleShader = Shader("particles.vert", "particles.frag");
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------

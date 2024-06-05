@@ -382,5 +382,11 @@
     <None Include="ikpFlac.dll" />
     <None Include="ikpMP3.dll" />
     <None Include="irrKlang.dll" />
+    <None Include="particles.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="particles.vert">
+      <Filter>Source Files\Shaders\Vertex</Filter>
+    </None>
   </ItemGroup>
 </Project>

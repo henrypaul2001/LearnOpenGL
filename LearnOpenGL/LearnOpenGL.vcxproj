@@ -226,6 +226,8 @@
     <None Include="lighting_hdr.vert" />
     <None Include="normal_mapping.frag" />
     <None Include="normal_mapping.vert" />
+    <None Include="particles.frag" />
+    <None Include="particles.vert" />
     <None Include="pbr_lighting.frag" />
     <None Include="pbr_lighting.vert" />
     <None Include="point_shadows.frag" />
