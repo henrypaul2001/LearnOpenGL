@@ -95,6 +95,52 @@ struct Character {
 
 std::map<char, Character> Characters;
 
+struct Particle {
+	glm::vec2 Position, Velocity;
+	glm::vec4 Colour;
+	float Life;
+	float Scale;
+
+	Particle() : Position(0.0f), Velocity(0.0f), Colour(1.0f), Life(0.0f), Scale(1.0f) {}
+};
+
+unsigned int lastUsedParticle = 0;
+int FindFirstUnusedParticle(const std::vector<Particle>& particles) {
+	// search from last used particle, this will usually retun almost instantly
+	for (unsigned int i = lastUsedParticle; i < particles.size(); i++) {
+		if (particles[i].Life <= 0.0f) {
+			lastUsedParticle = i;
+			return i;
+		}
+	}
+
+	// otherwise, do a linear search
+	for (unsigned int i = 0; i < lastUsedParticle; i++) {
+		if (particles[i].Life <= 0.0f) {
+			lastUsedParticle = i;
+			return i;
+		}
+	}
+
+	return -1;
+	
+	// override first particle if all others are alive
+	//lastUsedParticle = 0;
+	//return 0;
+}
+
+void RespawnParticle(Particle& particle, glm::vec2 generatorPosition, glm::vec2 generatorVelocity, glm::vec2 offset) {
+	float randomX = ((rand() % 100) - 50.0f) / 100.0f; // Random float between -0.5 and 0.5
+	float randomY = ((rand() % 100) - 50.0f) / 100.0f; // Random float between -0.5 and 0.5
+
+	float rColour = 0.5f + ((rand() % 100) / 100.0f);
+	particle.Position = generatorPosition + offset;
+	particle.Colour = glm::vec4(rColour, rColour, rColour, 1.0f);
+	particle.Life = 1.0f;
+	particle.Velocity = generatorVelocity * 0.1f + glm::vec2(randomX * 25.0f, randomY);
+	particle.Scale = 100.0f;
+}
+
 float lerp(float a, float b, float f)
 {
 	return a + f * (b - a);
@@ -4949,16 +4995,60 @@ int runScene14() {
 
 	// initialize static shader uniforms before rendering
 	// --------------------------------------------------
+	particleShader.use();
+	particleShader.setInt("sprite", 0);
 
 	// Load textures
 	// -------------
+	unsigned int particleTexture = LoadTexture("Textures/flame.png", GL_REPEAT, false);
 
 	// Model loading
 	// -------------
+	unsigned int VBO, VAO;
+	float particle_quad[] = {
+		0.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+
+		0.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 0.0f
+	};
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	// fill mesh buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(particle_quad), particle_quad, GL_STATIC_DRAW);
+	// set mesh attributes
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glBindVertexArray(0);
 
 	// Audio setup
 	// -----------
 
+	// Particles
+	// ---------
+
+	// Initialise default particle generator
+	glm::vec2 generatorPosition = glm::vec2(1000.0f, 100.0f);
+	glm::vec2 generatorVelocity = glm::vec2(25.0f, 750.0f);
+	glm::vec2 offset = glm::vec2(0.0f);
+	float decayRate = 1.5f;
+	unsigned int nr_particles = 3000;
+	std::vector<Particle> particles;
+	particles.reserve(nr_particles);
+
+	for (unsigned int i = 0; i < nr_particles; i++) {
+		particles.push_back(Particle());
+	}
+
+	const int startDelay = 6; // number of frames to wait before creating more particles
+	int delay = startDelay;
+
+	glEnable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -4975,11 +5065,62 @@ int runScene14() {
 
 		// update
 		// ------
+		glm::mat4 projection = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
+		
+		float time = (float)glfwGetTime();
+		generatorPosition += glm::vec2(-10.0, 0.0f) * (sin(time) * 0.05f);
+
+		if (delay == 0) {
+			delay = startDelay;
+			// create new particles
+			unsigned int nr_new_particles = 1;
+			for (unsigned int i = 0; i < nr_new_particles; i++) {
+				int unusedParticle = FindFirstUnusedParticle(particles);
+				if (unusedParticle != -1) {
+					RespawnParticle(particles[unusedParticle], generatorPosition, generatorVelocity, offset);
+				}
+			}
+		}
+		else {
+			delay--;
+		}
+
+		// update particles
+		for (unsigned int i = 0; i < nr_particles; i++) {
+			Particle& p = particles[i];
+			p.Life -= deltaTime;
+
+			if (p.Life > 0.0f) {
+				// particle is still alive
+				p.Position += p.Velocity * deltaTime;
+				p.Colour.a = 0.0f + (p.Life / 1.0f);
+				//p.Colour.a -= 2.5f * deltaTime;
+				//p.Scale -= deltaTime * 3.0f;
+			}
+		}
 
 		// render
 		// ------
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, particleTexture);
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE); // additive blending
+		particleShader.use();
+		particleShader.setMat4("projection", projection);
+		for (const Particle& particle : particles) {
+			if (particle.Life > 0.0f) {
+				particleShader.setVec2("offset", particle.Position);
+				particleShader.setVec4("colour", particle.Colour);
+				particleShader.setFloat("scale", particle.Scale);
+				glBindVertexArray(VAO);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glBindVertexArray(0);
+			}
+		}
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
