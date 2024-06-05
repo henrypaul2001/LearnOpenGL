@@ -5068,7 +5068,9 @@ int runScene14() {
 		glm::mat4 projection = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
 		
 		float time = (float)glfwGetTime();
-		generatorPosition += glm::vec2(-10.0, 0.0f) * (sin(time) * 0.05f);
+		//generatorPosition += glm::vec2(-10.0, 0.0f) * (sin(time) * 0.05f);
+
+		generatorPosition = glm::vec2(lastX, -lastY);
 
 		if (delay == 0) {
 			delay = startDelay;
