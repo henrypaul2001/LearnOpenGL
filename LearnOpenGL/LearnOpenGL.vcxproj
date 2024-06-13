@@ -239,6 +239,7 @@
     <None Include="prefilter.frag" />
     <None Include="reflection_cubemap.frag" />
     <None Include="reflection_cubemap.vert" />
+    <None Include="screenFilledQuad.vert" />
     <None Include="shadow_mapping.frag" />
     <None Include="shadow_mapping.vert" />
     <None Include="showNormals.frag" />
@@ -267,6 +268,7 @@
     <None Include="stencil_border.frag" />
     <None Include="text.frag" />
     <None Include="text.vert" />
+    <None Include="upsample.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
