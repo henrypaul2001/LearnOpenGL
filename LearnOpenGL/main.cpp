@@ -5189,6 +5189,7 @@ int runScene15() {
 	Shader downsampleShader("screenFilledQuad.vert", "downsample.frag");
 	Shader shader("bloom.vert", "bloom.frag");
 	Shader shaderLight("bloom.vert", "lightBox.frag");
+	Shader exposureShader("bloom_final.vert", "exposure.frag");
 
 	// load textures
 	// -------------
@@ -5210,7 +5211,7 @@ int runScene15() {
 	}
 
 	std::vector<BloomMip> mipChain;
-	int mipChainLength = 6;
+	int mipChainLength = 5;
 	for (unsigned int i = 0; i < mipChainLength; i++) {
 		BloomMip mip;
 
@@ -5355,6 +5356,9 @@ int runScene15() {
 	shader.use();
 	shader.setInt("diffuseTexture", 0);
 
+	exposureShader.use();
+	exposureShader.setInt("scene", 0);
+
 	std::cout << "Bloom passes = " << bloomPasses << std::endl;
 	std::cout << "Exposure = " << exposure << std::endl;
 	// render loop
@@ -5373,6 +5377,7 @@ int runScene15() {
 
 		// render
 		// ------
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -5486,7 +5491,68 @@ int runScene15() {
 #pragma endregion
 
 		// Advanced bloom step
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glDisable(GL_CULL_FACE);
+		// Downsample
+		// ----------
+		downsampleShader.use();
+		downsampleShader.setVec2("srcResolution", glm::vec2((float)SCR_WIDTH, (float)SCR_HEIGHT));
 
+		// Bind src texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mipChain[0].texture);
+
+		glDisable(GL_BLEND);
+
+		// Progressively downsample through the mip chain
+		for (int i = 0; i < mipChain.size(); i++) {
+			const BloomMip& mip = mipChain[i];
+
+			glViewport(0, 0, mip.size.x, mip.size.y);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mip.texture, 0);
+
+			// Render sceen filled quad at resolution of current mip
+			glBindVertexArray(quadVAO);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindVertexArray(0);
+
+			// Set current mip resolution as srcRes for next iteration
+			downsampleShader.setVec2("srcResolution", mip.size);
+			glBindTexture(GL_TEXTURE, mip.texture);
+		}
+
+		// Upsample
+		// --------
+		float filterRadius = 0.005f;
+		upsampleShader.use();
+		upsampleShader.setFloat("filterRadius", filterRadius);
+
+		// Additive blending
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glBlendEquation(GL_FUNC_ADD);
+
+		for (int i = mipChain.size() - 1; i > 0; i--) {
+			const BloomMip& mip = mipChain[i];
+			const BloomMip& nextMip = mipChain[i - 1];
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, mip.texture);
+
+			// Set framebuffer render target
+			glViewport(0, 0, nextMip.size.x, nextMip.size.y);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, nextMip.texture, 0);
+
+			// Screen quad at current mip res
+			glBindVertexArray(quadVAO);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindVertexArray(0);
+		}
+
+		glDisable(GL_BLEND);
+
+		// Combine scene texture with bloom texture
+		// ----------------------------------------
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------

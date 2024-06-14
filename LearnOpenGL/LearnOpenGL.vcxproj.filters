@@ -397,5 +397,8 @@
     <None Include="screenFilledQuad.vert">
       <Filter>Source Files\Shaders\Vertex</Filter>
     </None>
+    <None Include="exposure.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -209,6 +209,7 @@
     <None Include="explode.frag" />
     <None Include="explode.geom" />
     <None Include="explode.vert" />
+    <None Include="exposure.frag" />
     <None Include="geometry_shaders.frag" />
     <None Include="geometry_shaders.geom" />
     <None Include="geometry_shaders.vert" />
