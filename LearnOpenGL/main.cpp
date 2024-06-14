@@ -5192,7 +5192,7 @@ int runScene15() {
 	// -------------
 
 	// configure framebuffers
-	// ---------------------------------------
+	// ----------------------
 	unsigned int fbo;
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -5513,6 +5513,13 @@ int runScene15() {
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	for (int i = 0; i < mipChain.size(); i++) {
+		glDeleteTextures(1, &mipChain[i].texture);
+		mipChain[i].texture = 0;
+	}
+	glDeleteFramebuffers(1, &fbo);
+	fbo = 0;
 
 	glfwTerminate();
 	return 0;
