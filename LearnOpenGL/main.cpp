@@ -5198,9 +5198,46 @@ int runScene15() {
 
 	// configure framebuffers
 	// ----------------------
-	unsigned int fbo;
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	// Default FBO
+	// -----------
+	unsigned int hdrFBO;
+	glGenFramebuffers(1, &hdrFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+	
+	unsigned int screenTexture;
+	glGenTextures(1, &screenTexture);
+	glBindTexture(GL_TEXTURE_2D, screenTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	// attach texture to framebuffer
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
+
+	// create and attach depth buffer (renderbuffer)
+	unsigned int rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+	unsigned int attachments[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, attachments);
+
+	// finally check if framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "Framebuffer not complete!" << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Bloom FBO
+	// ---------
+	unsigned int bloomFBO;
+	glGenFramebuffers(1, &bloomFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, bloomFBO);
 
 	glm::vec2 mipSize((float)SCR_WIDTH, (float)SCR_HEIGHT);
 	glm::ivec2 mipIntSize((int)SCR_WIDTH, (int)SCR_HEIGHT);
@@ -5235,7 +5272,6 @@ int runScene15() {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mipChain[0].texture, 0);
 
 	// fbo attachments
-	unsigned int attachments[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, attachments);
 
 	// error check
@@ -5384,7 +5420,7 @@ int runScene15() {
 #pragma region SceneRender
 		// 1. render scene into floating point framebuffer
 		// -----------------------------------------------
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -5491,7 +5527,8 @@ int runScene15() {
 #pragma endregion
 
 		// Advanced bloom step
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, bloomFBO);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
 		// Downsample
 		// ----------
@@ -5500,7 +5537,7 @@ int runScene15() {
 
 		// Bind src texture
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mipChain[0].texture);
+		glBindTexture(GL_TEXTURE_2D, screenTexture);
 
 		glDisable(GL_BLEND);
 
@@ -5553,6 +5590,17 @@ int runScene15() {
 
 		// Combine scene texture with bloom texture
 		// ----------------------------------------
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		exposureShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, screenTexture);
+		exposureShader.setFloat("exposure", exposure);
+		// render quad
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -5564,8 +5612,8 @@ int runScene15() {
 		glDeleteTextures(1, &mipChain[i].texture);
 		mipChain[i].texture = 0;
 	}
-	glDeleteFramebuffers(1, &fbo);
-	fbo = 0;
+	glDeleteFramebuffers(1, &bloomFBO);
+	bloomFBO = 0;
 
 	glfwTerminate();
 	return 0;
