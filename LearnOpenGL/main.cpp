@@ -5183,6 +5183,9 @@ int runScene15() {
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
+	//glfwWindowHint(GLFW_SAMPLES, 4);
+	//glEnable(GL_MULTISAMPLE);
+
 	// build and compile shaders
 	// -------------------------
 	Shader upsampleShader("screenFilledQuad.vert", "upsample.frag");
@@ -5206,14 +5209,23 @@ int runScene15() {
 	glGenFramebuffers(1, &hdrFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
 	
-	unsigned int screenTexture;
+	unsigned int screenTexture, bloomMixedTexture;
 	glGenTextures(1, &screenTexture);
 	glBindTexture(GL_TEXTURE_2D, screenTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glGenTextures(1, &bloomMixedTexture);
+	glBindTexture(GL_TEXTURE_2D, bloomMixedTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 	// attach texture to framebuffer
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
 
@@ -5249,7 +5261,7 @@ int runScene15() {
 	}
 
 	std::vector<BloomMip> mipChain;
-	int mipChainLength = 5;
+	int mipChainLength = 6;
 	for (unsigned int i = 0; i < mipChainLength; i++) {
 		BloomMip mip;
 
@@ -5396,6 +5408,10 @@ int runScene15() {
 	exposureShader.use();
 	exposureShader.setInt("scene", 0);
 
+	bloomMixShader.use();
+	bloomMixShader.setInt("screenTexture", 0);
+	bloomMixShader.setInt("bloomTexture", 1);
+
 	std::cout << "Bloom passes = " << bloomPasses << std::endl;
 	std::cout << "Exposure = " << exposure << std::endl;
 	// render loop
@@ -5422,6 +5438,7 @@ int runScene15() {
 		// 1. render scene into floating point framebuffer
 		// -----------------------------------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -5561,7 +5578,7 @@ int runScene15() {
 
 		// Upsample
 		// --------
-		float filterRadius = 0.005f;
+		float filterRadius = 0.006f;
 		upsampleShader.use();
 		upsampleShader.setFloat("filterRadius", filterRadius);
 
@@ -5591,6 +5608,23 @@ int runScene15() {
 
 		// Combine scene texture with bloom texture
 		// ----------------------------------------
+		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bloomMixedTexture, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		bloomMixShader.use();
+		bloomMixShader.setFloat("bloomStrength", 0.04f);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, mipChain[0].texture);
+
+		// render quad
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 
 		// Final post process
 		// ------------------
@@ -5599,7 +5633,7 @@ int runScene15() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		exposureShader.use();
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, screenTexture);
+		glBindTexture(GL_TEXTURE_2D, bloomMixedTexture);
 		exposureShader.setFloat("exposure", exposure);
 		// render quad
 		glBindVertexArray(quadVAO);

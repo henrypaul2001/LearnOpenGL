@@ -7,7 +7,7 @@ in vec2 TexCoords;
 uniform sampler2D screenTexture;
 uniform sampler2D bloomTexture;
 
-uniform float bloomStrength = 0.04;
+uniform float bloomStrength;
 
 vec3 MixBloom() {
 	vec3 hdr = texture(screenTexture, TexCoords).rgb;
