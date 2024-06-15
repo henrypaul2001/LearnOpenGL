@@ -400,5 +400,8 @@
     <None Include="exposure.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
     </None>
+    <None Include="advancedBloom.frag">
+      <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
   </ItemGroup>
 </Project>

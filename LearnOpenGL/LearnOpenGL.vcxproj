@@ -177,6 +177,7 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="advancedBloom.frag" />
     <None Include="advanced_lighting.frag" />
     <None Include="advanced_lighting.vert" />
     <None Include="anim.frag" />

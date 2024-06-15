@@ -5189,6 +5189,7 @@ int runScene15() {
 	Shader downsampleShader("screenFilledQuad.vert", "downsample.frag");
 	Shader shader("bloom.vert", "bloom.frag");
 	Shader shaderLight("bloom.vert", "lightBox.frag");
+	Shader bloomMixShader("bloom_final.vert", "advancedBloom.frag");
 	Shader exposureShader("bloom_final.vert", "exposure.frag");
 
 	// load textures
@@ -5590,6 +5591,9 @@ int runScene15() {
 
 		// Combine scene texture with bloom texture
 		// ----------------------------------------
+
+		// Final post process
+		// ------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
