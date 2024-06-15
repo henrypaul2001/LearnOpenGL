@@ -5584,6 +5584,7 @@ int runScene15() {
 		float filterRadius = 0.005f;
 		upsampleShader.use();
 		upsampleShader.setFloat("filterRadius", filterRadius);
+		upsampleShader.setFloat("aspectRatio", (float)SCR_WIDTH / (float)SCR_HEIGHT);
 
 		// Additive blending
 		glEnable(GL_BLEND);

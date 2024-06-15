@@ -4,6 +4,7 @@
 
 uniform sampler2D srcTexture;
 uniform float filterRadius;
+uniform float aspectRatio;
 
 in vec2 texCoord;
 layout (location = 0) out vec3 upsample;
@@ -13,7 +14,7 @@ void main()
     // The filter kernel is applied with a radius, specified in texture
     // coordinates, so that the radius will vary across mip resolutions.
     float x = filterRadius;
-    float y = filterRadius;
+    float y = filterRadius * aspectRatio;
 
     // Take 9 samples around current texel:
     // a - b - c
