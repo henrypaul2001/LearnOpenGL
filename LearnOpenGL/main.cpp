@@ -5183,9 +5183,6 @@ int runScene15() {
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
-	//glfwWindowHint(GLFW_SAMPLES, 4);
-	//glEnable(GL_MULTISAMPLE);
-
 	// build and compile shaders
 	// -------------------------
 	Shader upsampleShader("screenFilledQuad.vert", "upsample.frag");
@@ -5548,6 +5545,7 @@ int runScene15() {
 		glBindFramebuffer(GL_FRAMEBUFFER, bloomFBO);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_CULL_FACE);
+
 		// Downsample
 		// ----------
 		downsampleShader.use();
@@ -5559,9 +5557,14 @@ int runScene15() {
 
 		glDisable(GL_BLEND);
 
+		downsampleShader.setBool("firstIteration", true);
 		// Progressively downsample through the mip chain
 		for (int i = 0; i < mipChain.size(); i++) {
 			const BloomMip& mip = mipChain[i];
+
+			if (i > 0) {
+				downsampleShader.setBool("firstIteration", false);
+			}
 
 			glViewport(0, 0, mip.size.x, mip.size.y);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mip.texture, 0);
@@ -5578,7 +5581,7 @@ int runScene15() {
 
 		// Upsample
 		// --------
-		float filterRadius = 0.006f;
+		float filterRadius = 0.005f;
 		upsampleShader.use();
 		upsampleShader.setFloat("filterRadius", filterRadius);
 

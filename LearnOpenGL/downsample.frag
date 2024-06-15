@@ -9,6 +9,27 @@ uniform vec2 srcResolution;
 in vec2 texCoord;
 layout (location = 0) out vec3 downsample;
 
+vec3 PowVec3(vec3 v, float p)
+{
+	return vec3(pow(v.x, p), pow(v.y, p), pow(v.z, p));
+}
+
+const float invGamma = 1.0 / 2.2;
+vec3 ToSRGB(vec3 v) { return PowVec3(v, invGamma); }
+
+float RGBToLuminance(vec3 colour)
+{
+	return dot(colour, vec3(0.2126, 0.71252, 0.0722));
+}
+
+float KarisAverage(vec3 colour)
+{
+	float luma = RGBToLuminance(ToSRGB(colour)) * 0.25;
+	return 1.0 / (1.0 + luma);
+}
+
+uniform bool firstIteration;
+
 void main() {
 	vec2 srcTexelSize = 1.0 / srcResolution;
 	float x = srcTexelSize.x;
@@ -47,10 +68,30 @@ void main() {
 	// e,f,h,i * 0.125
 	// j,k,l,m * 0.5
 
-	// 0.125 * 5 + 0.03125 * 4 + 0.0625 * 4 = 1
-	downsample = e * 0.125;
-	downsample += (a + c + g + i) * 0.03125;
-	downsample += (b + d + f + h) * 0.0625;
-	downsample += (j + k + l + m) * 0.125;
+
+	// Helps alleviate firefly artifacts using karis average
+	if (firstIteration) {
+		// Writing to mip level 0, apply karis average to each block of 4 samples to prevent fireflies
+		vec3 groups[5];
+		groups[0] = (a + b + d + e) * (0.125f / 4.0f);
+		groups[1] = (b + c + e + f) * (0.125f / 4.0f);
+		groups[2] = (d + e + g + h) * (0.125f / 4.0f);
+		groups[3] = (e + f + h + i) * (0.125f / 4.0f);
+		groups[4] = (j + k + l + m) * (0.5f / 4.0f);
+		
+		groups[0] *= KarisAverage(groups[0]);
+		groups[1] *= KarisAverage(groups[1]);
+		groups[2] *= KarisAverage(groups[2]);
+		groups[3] *= KarisAverage(groups[3]);
+		groups[4] *= KarisAverage(groups[4]);
+		downsample = groups[0] + groups[1] + groups[2] + groups[3] + groups[4];
+	}
+	else {
+		// 0.125 * 5 + 0.03125 * 4 + 0.0625 * 4 = 1
+		downsample = e * 0.125;
+		downsample += (a + c + g + i) * 0.03125;
+		downsample += (b + d + f + h) * 0.0625;
+		downsample += (j + k + l + m) * 0.125;
+	}
 	downsample = max(downsample, 0.0001);
 }
