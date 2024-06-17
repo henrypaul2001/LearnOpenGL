@@ -5196,6 +5196,7 @@ int runScene15() {
 	// -------------
 	unsigned int woodTexture = LoadTexture("Textures/wood.png", GL_REPEAT, true); // note that we're loading the texture as an SRGB texture
 	unsigned int containerTexture = LoadTexture("Textures/container2.png", GL_REPEAT, true); // note that we're loading the texture as an SRGB texture
+	unsigned int lensDirt = LoadTexture("Textures/dirtmask.jpg", GL_REPEAT, false);
 
 	// configure framebuffers
 	// ----------------------
@@ -5408,6 +5409,7 @@ int runScene15() {
 	bloomMixShader.use();
 	bloomMixShader.setInt("screenTexture", 0);
 	bloomMixShader.setInt("bloomTexture", 1);
+	bloomMixShader.setInt("dirtMask", 2);
 
 	std::cout << "Bloom passes = " << bloomPasses << std::endl;
 	std::cout << "Exposure = " << exposure << std::endl;
@@ -5624,11 +5626,15 @@ int runScene15() {
 
 		bloomMixShader.use();
 		bloomMixShader.setFloat("bloomStrength", 0.04f);
+		bloomMixShader.setFloat("dirtMaskStrength", 20.0f);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, screenTexture);
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, mipChain[0].texture);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, lensDirt);
 
 		// render quad
 		glBindVertexArray(quadVAO);
