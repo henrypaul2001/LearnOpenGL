@@ -6,6 +6,9 @@
 uniform sampler2D srcTexture;
 uniform vec2 srcResolution;
 
+uniform float threshold;
+uniform float softThreshold;
+
 in vec2 texCoord;
 layout (location = 0) out vec3 downsample;
 
@@ -85,6 +88,16 @@ void main() {
 		groups[3] *= KarisAverage(groups[3]);
 		groups[4] *= KarisAverage(groups[4]);
 		downsample = groups[0] + groups[1] + groups[2] + groups[3] + groups[4];
+
+		float brightness = max(downsample.r, max(downsample.g, downsample.b));
+		float knee = threshold * softThreshold;
+		float soft = brightness - threshold + knee;
+		soft = clamp(soft, 0, 2.0 * knee);
+		soft = soft * soft / (4.0 * knee + 0.00001);
+
+		float contribution = max(soft, brightness - threshold);
+		contribution /= max(brightness, 0.00001);
+		downsample *= contribution;
 	}
 	else {
 		// 0.125 * 5 + 0.03125 * 4 + 0.0625 * 4 = 1
