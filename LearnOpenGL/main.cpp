@@ -5550,12 +5550,14 @@ int runScene15() {
 		// ----------
 		downsampleShader.use();
 		downsampleShader.setVec2("srcResolution", glm::vec2((float)SCR_WIDTH, (float)SCR_HEIGHT));
-
+		downsampleShader.setFloat("threshold", 1.0f);
+		downsampleShader.setFloat("softThreshold", 0.5f);
 		// Bind src texture
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, screenTexture);
 
 		glDisable(GL_BLEND);
+
+		unsigned int previousTexture = screenTexture;
 
 		downsampleShader.setBool("firstIteration", true);
 		// Progressively downsample through the mip chain
@@ -5569,6 +5571,8 @@ int runScene15() {
 			glViewport(0, 0, mip.size.x, mip.size.y);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mip.texture, 0);
 
+			glBindTexture(GL_TEXTURE_2D, previousTexture);
+
 			// Render sceen filled quad at resolution of current mip
 			glBindVertexArray(quadVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -5576,7 +5580,8 @@ int runScene15() {
 
 			// Set current mip resolution as srcRes for next iteration
 			downsampleShader.setVec2("srcResolution", mip.size);
-			glBindTexture(GL_TEXTURE, mip.texture);
+			previousTexture = mip.texture;
+			//glBindTexture(GL_TEXTURE, mip.texture);
 		}
 
 		// Upsample
