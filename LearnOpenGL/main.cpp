@@ -5859,6 +5859,7 @@ int runScene16() {
 	// shader configuration
 	// --------------------
 	computeShader.use();
+	computeShader.setFloat("width", 512);
 
 	screenShader.use();
 	screenShader.setInt("screenTexture", 0);
@@ -5895,6 +5896,7 @@ int runScene16() {
 
 		// Run compute shader
 		computeShader.use();
+		computeShader.setFloat("t", currentFrame);
 		glDispatchCompute(texWidth, texHeight, 1);
 
 		// Make sure writing to image has finished before reading
