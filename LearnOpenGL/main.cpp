@@ -5673,6 +5673,246 @@ int runScene15() {
 	return 0;
 }
 
+int runScene16() {
+	// glfw: initialize and configure
+		// ------------------------------
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// glad: load all OpenGL function pointers
+	// ---------------------------------------
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// build and compile shaders
+	// -------------------------
+	ComputeShader computeShader = ComputeShader("computeShader.comp");
+	Shader screenShader = Shader("framebuffer.vert", "framebuffer.frag");
+
+	// load textures
+	// -------------
+	const unsigned int texWidth = 512u, texHeight = 512u;
+	unsigned int computeTexture;
+	glGenTextures(1, &computeTexture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, computeTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, texWidth, texHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(0, computeTexture, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+
+	// configure framebuffers
+	// ----------------------
+
+	// Default FBO
+	// -----------
+	unsigned int hdrFBO;
+	glGenFramebuffers(1, &hdrFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+
+	unsigned int screenTexture;
+	glGenTextures(1, &screenTexture);
+	glBindTexture(GL_TEXTURE_2D, screenTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// attach texture to framebuffer
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
+
+	// create and attach depth buffer (renderbuffer)
+	unsigned int rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+	unsigned int attachments[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, attachments);
+
+	// finally check if framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "Framebuffer not complete!" << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// VAOs
+	// -----
+
+	// Cube
+	float vertices[] = {
+		// back face
+		-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+		 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+		 1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+		 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+		-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+		-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+		// front face
+		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+		 1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+		 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+		 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+		-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+		// left face
+		-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+		-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+		-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+		-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+		-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+		-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+		// right face
+		 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+		 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+		 1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+		 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+		 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+		 1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+		 // bottom face
+		 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+		  1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+		  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+		  1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+		 -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+		 -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+		 // top face
+		 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+		  1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+		  1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+		  1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+		 -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+		 -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+	};
+	unsigned int cubeVAO, cubeVBO;
+	glGenVertexArrays(1, &cubeVAO);
+	glGenBuffers(1, &cubeVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindVertexArray(cubeVAO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	// quad
+	float quadVertices[] = {
+		// positions        // texture Coords
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+	};
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	// lighting info
+	// -------------
+
+	// shader configuration
+	// --------------------
+	computeShader.use();
+
+	screenShader.use();
+	screenShader.setInt("screenTexture", 0);
+
+	// render loop
+	// -----------
+	while (!glfwWindowShouldClose(window))
+	{
+		// per-frame time logic
+		// --------------------
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		// input
+		// -----
+		processInput(window);
+
+		// render
+		// ------
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Run compute shader
+		computeShader.use();
+		glDispatchCompute(texWidth, texHeight, 1);
+
+		// Make sure writing to image has finished before reading
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+		// render screen quad
+		screenShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, computeTexture);
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glDeleteTextures(1, &screenTexture);
+	screenTexture = 0;
+	glDeleteFramebuffers(1, &hdrFBO);
+	hdrFBO = 0;
+
+	glfwTerminate();
+	return 0;
+}
+
 int main() {
-	return runScene15();
+	return runScene16();
 }
