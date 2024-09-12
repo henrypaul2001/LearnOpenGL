@@ -25,6 +25,9 @@
     <Filter Include="Source Files\Shaders\Geometry">
       <UniqueIdentifier>{365fa91e-c093-40b2-9115-506737b98255}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shaders\Compute">
+      <UniqueIdentifier>{71f4dd2a-2572-4175-aab6-0c8522e36d11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -408,6 +411,9 @@
     </None>
     <None Include="advancedBloom.frag">
       <Filter>Source Files\Shaders\Fragment</Filter>
+    </None>
+    <None Include="computeShader.comp">
+      <Filter>Source Files\Shaders\Compute</Filter>
     </None>
   </ItemGroup>
 </Project>
