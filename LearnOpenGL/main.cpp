@@ -5863,6 +5863,8 @@ int runScene16() {
 	screenShader.use();
 	screenShader.setInt("screenTexture", 0);
 
+	glfwSwapInterval(0);
+	int fCounter = 0;
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -5872,6 +5874,14 @@ int runScene16() {
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		if (fCounter > 500) {
+			std::cout << "FPS: " << 1 / deltaTime << std::endl;
+			fCounter = 0;
+		}
+		else {
+			fCounter++;
+		}
 
 		// input
 		// -----
