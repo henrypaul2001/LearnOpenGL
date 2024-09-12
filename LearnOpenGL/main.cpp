@@ -5721,7 +5721,7 @@ int runScene16() {
 
 	// load textures
 	// -------------
-	const unsigned int texWidth = 512u, texHeight = 512u;
+	const unsigned int texWidth = 1000u, texHeight = 1000u;
 	unsigned int computeTexture;
 	glGenTextures(1, &computeTexture);
 	glActiveTexture(GL_TEXTURE0);
@@ -5859,7 +5859,7 @@ int runScene16() {
 	// shader configuration
 	// --------------------
 	computeShader.use();
-	computeShader.setFloat("width", 512);
+	computeShader.setFloat("width", (float)texWidth);
 
 	screenShader.use();
 	screenShader.setInt("screenTexture", 0);
@@ -5897,7 +5897,7 @@ int runScene16() {
 		// Run compute shader
 		computeShader.use();
 		computeShader.setFloat("t", currentFrame);
-		glDispatchCompute(texWidth, texHeight, 1);
+		glDispatchCompute(texWidth / 10, texHeight / 10, 1);
 
 		// Make sure writing to image has finished before reading
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
